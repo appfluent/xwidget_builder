@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package_utils.dart';
+
 class PathResolver {
   static Future<Uri> get packageRoot async {
     final package = await Isolate.packageConfig;
@@ -18,24 +20,19 @@ class PathResolver {
   /// because it wasn't added as a dependency.
   static Future<Uri> relativeToAbsolute(String path) async {
     String uriPath = path;
-    bool fromRoot = false;
-
     if (path.contains("|")) {
       final parts = path.split("|");
       uriPath = "package:${parts[0]}/${parts[1]}";
-      fromRoot = true;
     }
     if (uriPath.startsWith("package:")) {
       final packageUri = Uri.parse(uriPath);
-      final resolvedUri = await Isolate.resolvePackageUri(packageUri);
-      if (resolvedUri != null) {
-        return Uri.parse((fromRoot)
-            ? resolvedUri.toString().replaceFirst("/lib/", "/")
-            : resolvedUri.toString());
+      final basePath = findPackageInCache(packageUri.pathSegments[0])?.path;
+      if (basePath != null) {
+        final relativePath = packageUri.pathSegments.skip(1).join('/');
+        return Uri.parse("file://$basePath/$relativePath");
       }
       throw Exception("Invalid package path: '$path'");
     }
-
     final root = await packageRoot;
     return root.resolve(path);
   }

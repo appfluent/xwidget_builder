@@ -1,3 +1,7 @@
+## 0.1.2
+
+* Fixed several issues with project initialization scripts
+
 ## 0.1.1
 
 * Added example usage

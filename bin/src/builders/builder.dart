@@ -178,7 +178,7 @@ class BuilderConfig {
   BuilderConfig({this.allowDeprecated = false});
 
   Future<void> loadConfig(String path) async {
-    final doc = await ConfigLoader.loadYamlDocument(path);
+    final doc = await ConfigLoader.loadYamlDoc(path);
     if (doc != null) {
       CliLog.success("Found config at '$path'");
 

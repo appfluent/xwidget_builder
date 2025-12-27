@@ -5,8 +5,15 @@ import 'package:yaml/yaml.dart';
 import 'cli_log.dart';
 import 'path_resolver.dart';
 
+/// Utility class for loading and parsing YAML configuration files.
+/// Provides methods to read YAML documents and extract values with
+/// type safety and default value handling.
 class ConfigLoader {
-  static Future<dynamic> loadYamlDocument(String path) async {
+
+  /// Loads a YAML document from the given [path].
+  /// Returns the parsed YAML structure or null if the file doesn't exist.
+  /// The path is resolved relative to the project root.
+  static Future<dynamic> loadYamlDoc(String path) async {
     final uri = await PathResolver.relativeToAbsolute(path);
     final file = File.fromUri(uri);
     if (file.existsSync()) {
@@ -16,6 +23,9 @@ class ConfigLoader {
     return null;
   }
 
+  /// Extracts a string value from [doc] at the given [key] path.
+  /// Returns [defaultValue] if the key doesn't exist or value is not a string.
+  /// Supports nested keys using dot notation (e.g., "parent.child").
   static String loadToString(dynamic doc, String key, String defaultValue) {
     final value = getValue(doc, key);
     if (value != null) {
@@ -25,6 +35,9 @@ class ConfigLoader {
     return defaultValue;
   }
 
+  /// Extracts values from [doc] at the given [key] and adds them to [set].
+  /// Handles YamlList, List<String>, or single String values.
+  /// Logs warnings for invalid types or items.
   static void loadToSet(dynamic doc, String key, Set set) {
     final value = getValue(doc, key);
     if (value != null) {
@@ -48,6 +61,9 @@ class ConfigLoader {
     }
   }
 
+  /// Extracts key-value pairs from [doc] at the given [key] and adds them to [map].
+  /// Handles YamlMap or Map<String, String> values.
+  /// Logs warnings for invalid types or entries.
   static void loadToMap(dynamic doc, String key, Map map) {
     final value = getValue(doc, key);
     if (value != null) {
@@ -68,6 +84,9 @@ class ConfigLoader {
     }
   }
 
+  /// Retrieves a value from [doc] using a dot-notation [key] path.
+  /// Supports nested navigation (e.g., "parent.child.grandchild").
+  /// Returns null if the document is null or the key doesn't exist.
   static dynamic getValue(dynamic doc, String key) {
     if (doc == null) return null;
     final first = key.indexOf(".");

@@ -1,7 +1,28 @@
+# App Initialization
+
+The easies way to get stated is by letting XWidget initialize your project for you.
+
+Installs XWidget dependencies and installs required configuration files, but does not overwrite
+existing files.
+```shell
+$ dart run xwidget_builder:init
+```
+
+Installs XWidget dependencies and installs a basic example app, overwriting existing files.
+```shell
+$ dart run xwidget_builder:int --new-app
+```
+
+Displays usage help
+```shell
+$ dart run xwidget_builder:generate --help
+```
+
 # Code Generation
 
-To generate inflaters, controllers, and other required files, run the following command:
+Once you've initialized you app, use the following commands to generate XWidget components
 
+To generate inflaters, controllers, and other required files, run the following command:
 ```shell
 $ dart run xwidget_builder:generate
 ```
