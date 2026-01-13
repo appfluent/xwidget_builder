@@ -35,6 +35,18 @@ class ConfigLoader {
     return defaultValue;
   }
 
+  /// Extracts a string value from [doc] at the given [key] path.
+  /// Returns [defaultValue] if the key doesn't exist or value is not a string.
+  /// Supports nested keys using dot notation (e.g., "parent.child").
+  static String? loadToStringOrNull(dynamic doc, String key, [String? defaultValue]) {
+    final value = getValue(doc, key);
+    if (value != null) {
+      if (value is String) return value;
+      CliLog.warn("'$key' is invalid");
+    }
+    return defaultValue;
+  }
+
   /// Extracts values from [doc] at the given [key] and adds them to [set].
   /// Handles YamlList, List<String>, or single String values.
   /// Logs warnings for invalid types or items.
@@ -96,7 +108,16 @@ class ConfigLoader {
       final nextDoc = doc[currentKey];
       return getValue(nextDoc, nextKey);
     } else {
-      return doc[key];
+      if (doc is Map) {
+        return doc[key];
+      }
+      if (doc is List) {
+        final index = int.tryParse(key);
+        if (index != null) {
+          return doc[index];
+        }
+      }
+      return null;
     }
   }
 }

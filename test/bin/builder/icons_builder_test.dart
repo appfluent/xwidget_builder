@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 import '../../../bin/src/builders/builder.dart';
 import '../../../bin/src/builders/icons.dart';
 
-
+/// Dart tests.
 void main() {
 
   test('Test new icon spec format', () async {
@@ -13,6 +13,7 @@ void main() {
 
     final builder = IconsBuilder(config);
     final result = await builder.build();
+
     expect(result.outputs.length, 1);
     expect(result.warnings, 0, reason: "Number of warnings");
     expect(result.errors, 0, reason: "Number of errors");

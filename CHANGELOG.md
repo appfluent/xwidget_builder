@@ -1,3 +1,12 @@
+## 0.2.0
+
+### **Breaking Changes**
+
+Increased Flutter version constraint from >=1.17.0 to >=3.10.0
+Decreased Dart SDK constraint from >=3.4.4 to >=3.0.0
+Fixed bug with dependency versioning
+Fixed builder tests
+
 ## 0.1.2
 
 * Fixed several issues with project initialization scripts

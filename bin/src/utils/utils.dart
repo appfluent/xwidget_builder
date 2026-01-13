@@ -70,7 +70,8 @@ String toYaml(dynamic value, {int indent = 0}) {
           write(val, level + 2);
         } else {
           final scalar = scalarToYaml(val);
-          // scalarToYaml may return a block (with newlines). If so, it already contains indentation.
+          // scalarToYaml may return a block (with newlines).
+          // If so, it already contains indentation.
           if (scalar.contains('\n') && scalar.trimLeft().startsWith('|')) {
             sb.writeln('$p$key: ${scalar.trimLeft()}');
           } else {
@@ -131,8 +132,12 @@ Future<ProcessResult> runCommand(
 /// Retrieves the version of xwidget_builder from its pubspec.yaml file.
 /// Returns the version string or "<unknown>" if not found.
 Future<String> getBuilderVersion() async {
-  final pubspec = await ConfigLoader.loadYamlDoc("xwidget_builder|pubspec.yaml");
-  return ConfigLoader.loadToString(pubspec, "version", "<unknown>");
+  final pubspec = await ConfigLoader.loadYamlDoc("pubspec.lock");
+  return ConfigLoader.loadToString(
+      pubspec,
+      "packages.xwidget_builder.version",
+      "<unknown>"
+  );
 }
 
 /// Resolves Flutter project dependencies by running `flutter pub get`.

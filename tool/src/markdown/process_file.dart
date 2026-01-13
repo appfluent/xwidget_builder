@@ -11,10 +11,6 @@ const usageHint = "<!-- This file was generated. "
     "Run 'dart run tool/markdown.dart -i doc/README.md -o README.md' "
     "to update this file. -->";
 
-extension on FileSystemEntity {
-  bool get isMarkdownFile => this is File && path.toLowerCase().endsWith('.md');
-}
-
 void processFile(String inputPath, [String? outputPath]) {
   outputPath ??= inputPath;
   CliLog.info("Processing $inputPath -> $outputPath...");

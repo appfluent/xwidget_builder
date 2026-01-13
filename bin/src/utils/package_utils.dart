@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 
 import 'cli_log.dart';
+import 'config_loader.dart';
 
 /// Represents metadata information about a Dart/Flutter package.
 /// Contains basic package details typically found in pubspec.yaml
@@ -66,18 +67,42 @@ Future<PackageInfo?> getPackageInfo(String packageName) async {
 
 /// Gets the pub cache directory
 Directory getPubCacheDir() {
-  final pubCache = Platform.environment['PUB_CACHE'] ??
-      path.join(Platform.environment['HOME'] ??
+  final pubCache =
+      Platform.environment['PUB_CACHE'] ??
+      path.join(
+          Platform.environment['HOME'] ??
           Platform.environment['USERPROFILE'] ?? '',
-          '.pub-cache');
+          '.pub-cache'
+      );
   return Directory(pubCache);
 }
 
 /// Finds a package in the pub cache
-Directory? findPackageInCache(String packageName) {
+Future<String> findPackagePath(String packageName) async {
+
+  // check to see if we're pointing to a local folder
+  final pubspecLock = await ConfigLoader.loadYamlDoc("pubspec.lock");
+  final localPath = ConfigLoader.loadToStringOrNull(pubspecLock, "packages.$packageName.description.path");
+  if (localPath != null) return localPath;
+
+  // check to make sure pub.dev folder exists
   final pubCache = getPubCacheDir();
   final hostedDir = Directory(path.join(pubCache.path, 'hosted', 'pub.dev'));
-  if (!hostedDir.existsSync()) return null;
+  if (!hostedDir.existsSync()) {
+    throw Exception("Package '$packageName' not found, because the hosted "
+        "packages cache does not exist: '${hostedDir.path}'");
+  }
+
+  // check for the version specified in pubspec.lock
+  final version = ConfigLoader.loadToStringOrNull(pubspecLock, "packages.$packageName.version");
+  if (version != null && version.trim().isNotEmpty) {
+    final dir = Directory(path.join(hostedDir.path, '$packageName-$version'));
+    if (!dir.existsSync()) {
+      throw Exception("Package '$packageName-$version' not found in "
+          "hosted packages cache '${hostedDir.path}'.");
+    }
+    return dir.path;
+  }
 
   // Find all versions of the package
   final packages = hostedDir
@@ -85,9 +110,12 @@ Directory? findPackageInCache(String packageName) {
       .whereType<Directory>()
       .where((dir) => path.basename(dir.path).startsWith('$packageName-'))
       .toList();
-  if (packages.isEmpty) return null;
+  if (packages.isEmpty) {
+    throw Exception("Package '$packageName' not found in hosted packages "
+        "cache '${hostedDir.path}'.");
+  }
 
   // Sort by version and get the latest (simple string sort)
   packages.sort((a, b) => path.basename(b.path).compareTo(path.basename(a.path)));
-  return packages.first;
+  return packages.first.path;
 }

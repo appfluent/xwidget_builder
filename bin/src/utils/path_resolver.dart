@@ -1,12 +1,30 @@
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package_utils.dart';
 
 class PathResolver {
-  static Future<Uri> get packageRoot async {
-    final package = await Isolate.packageConfig;
-    return package != null ? package.resolve("../") : Directory.current.uri;
+  static Uri get packageRoot {
+    Uri? configUri = findPackageConfigUri(Directory.current);
+    return configUri != null
+        ? configUri.resolve("../")
+        : Directory.current.uri;
+  }
+
+  /// Finds the URI of the package_config.json file by walking up from
+  /// a starting directory.
+  static Uri? findPackageConfigUri(Directory startDir) {
+    Directory? current = startDir;
+    while (current != null) {
+      final configFile = File('${current.path}/.dart_tool/package_config.json');
+      if (configFile.existsSync()) {
+        return configFile.uri;
+      }
+      // Move up to the parent directory
+      final parent = current.parent;
+      if (parent.path == current.path) break;
+      current = parent;
+    }
+    return null;
   }
 
   /// Resolves relative package path to an absolute file path.
@@ -26,14 +44,11 @@ class PathResolver {
     }
     if (uriPath.startsWith("package:")) {
       final packageUri = Uri.parse(uriPath);
-      final basePath = findPackageInCache(packageUri.pathSegments[0])?.path;
-      if (basePath != null) {
-        final relativePath = packageUri.pathSegments.skip(1).join('/');
-        return Uri.parse("file://$basePath/$relativePath");
-      }
-      throw Exception("Invalid package path: '$path'");
+      final basePath = await findPackagePath(packageUri.pathSegments[0]);
+      final relativePath = packageUri.pathSegments.skip(1).join('/');
+      return Uri.parse("file://$basePath/$relativePath");
     }
-    final root = await packageRoot;
+    final root = packageRoot;
     return root.resolve(path);
   }
 }
