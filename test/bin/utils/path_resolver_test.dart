@@ -1,8 +1,7 @@
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../../../bin/src/utils/path_resolver.dart';
 
-/// Dart tests.
 void main() {
   test('Test package path resolution should throw exception with specific message', () async {
     await expectLater(

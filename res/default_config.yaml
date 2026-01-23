@@ -16,26 +16,10 @@ inflaters:
     "CachedNetworkImage:imageRenderMethodForWeb",
   ]
 
-  # TODO: find a way to read variable object defaults from source
-  # Unfortunately, the analyzer's public API is very limiting. The information is there, but
-  # we can't access it unless they make it public. For now we'll just have to maintain this map.
   constructor_arg_defaults:
-    "AnimatedCrossFade:layoutBuilder": "AnimatedCrossFade.defaultLayoutBuilder"
-    "BoxShadow:color": "const Color(0xFF000000)"
-    "CupertinoSliverRefreshControl:builder": "CupertinoSliverRefreshControl.buildRefreshIndicator"
-    "CupertinoTextField:placeholderStyle": "const TextStyle(fontWeight: FontWeight.w400, color: CupertinoColors.placeholderText)"
-    "CupertinoTextField.borderless:placeholderStyle": "const TextStyle(fontWeight: FontWeight.w400, color: CupertinoColors.placeholderText)"
-    "Dialog:insetPadding": "const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0)"
-    "FloatingActionButton:heroTag": "'<default FloatingActionButton hero tag>'"
-    "FloatingActionButton.small:heroTag": "'<default FloatingActionButton hero tag>'"
-    "FloatingActionButton.large:heroTag": "'<default FloatingActionButton hero tag>'"
-    "FloatingActionButton.extended:heroTag": "'<default FloatingActionButton hero tag>'"
-    "SlidableAction:backgroundColor": "Colors.white"
     "Text:data": "XWidgetUtils.joinStrings(text)"
     "WidgetSpan:alignment": "PlaceholderAlignment.middle"
     "*:colorBlendMode": "BlendMode.srcIn"
-    "*:selectionHeightStyle": "BoxHeightStyle.tight"
-    "*:selectionWidthStyle": "BoxWidthStyle.tight"
 
   constructor_arg_parsers:
     # basic types

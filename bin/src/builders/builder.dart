@@ -25,42 +25,6 @@ abstract class SpecBuilder {
     return comments.toString();
   }
 
-  String buildImports(
-      Iterable<LibraryElement?> libraries,
-      [Iterable<String>? configuredImports]
-  ) {
-    final code = StringBuffer();
-    final locations = <String>{}; // used for duplicate checking
-
-    if (libraries.isNotEmpty) {
-      // import all libraries used in the spec library
-      for (final library in libraries) {
-        if (library != null) {
-          for (final imported in library.importedLibraries) {
-            final location = imported.location.toString();
-            if (location != "dart:core" && !locations.contains(location)) {
-              locations.add(location);
-              code.write("import '$location';\n");
-            }
-          }
-        }
-      }
-      code.write("\n");
-    }
-
-    if (configuredImports != null && configuredImports.isNotEmpty) {
-      // write configured imports
-      for (final location in configuredImports) {
-        if (!locations.contains(location)) {
-          code.write("import '$location';\n");
-        }
-      }
-      code.write("\n");
-    }
-
-    return code.toString();
-  }
-
   bool isTypeList(String type) {
     final match = listTypeRegExp.firstMatch(type);
     return match != null;
@@ -155,9 +119,8 @@ abstract class SpecBuilder {
   /// it should be a 'private' reference in Dependencies (prepend '_' to Dependencies key).
   bool isPrivateAccessParam(ParameterElement param, bool isCustomWidget) {
     final paramType = param.type.displayStringWithoutNullability();
-    return (paramType == "Dependencies" ||
-            paramType == "XmlElement")  &&
-           isCustomWidget;
+    return (paramType == "Dependencies" || paramType == "XmlElement")  &&
+        isCustomWidget;
   }
 }
 

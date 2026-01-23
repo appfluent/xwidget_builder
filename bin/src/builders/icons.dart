@@ -5,6 +5,7 @@ import 'package:path/path.dart';
 
 import '../utils/cli_log.dart';
 import '../utils/extensions.dart';
+import '../utils/import_utils.dart';
 import '../utils/path_resolver.dart';
 import '../utils/source_analyzer.dart';
 import 'builder.dart';
@@ -23,9 +24,10 @@ class IconsBuilder extends SpecBuilder {
       final analyzer = SourceAnalyzer();
       final sourceManifest = await analyzer.getSourceManifest(iconConfig.sources);
       final libraryElements = await analyzer.getLibraryElements(sourceManifest.paths);
+      final importBuilder = ImportBuilder();
 
-      output.write(buildFileComments());
-      output.write(buildImports(libraryElements.values, iconConfig.imports));
+      await importBuilder.loadLibraries(libraryElements.values, true);
+      importBuilder.addImports(iconConfig.imports);
 
       // build icon map
       for (final path in sourceManifest.paths) {
@@ -49,11 +51,15 @@ class IconsBuilder extends SpecBuilder {
                         if (iconType == "IconData") {
                           registrations.write(_buildRegisterIconCall(enclosingElement.displayName, variable.displayName));
                         } else {
-                          CliLog.warn("Skipped icon. Expected icon item to be of type 'IconData', but found '$iconType'");
+                          CliLog.warn("Skipped icon. Expected icon "
+                              "item to be of type 'IconData', but found "
+                              "'$iconType'"
+                          );
                         }
                       } else {
-                        CliLog.warn("Skipped icon. Expected icon item to be a member of a class e.i. 'Icons.add' or "
-                            "something similar, but found '$icon'");
+                        CliLog.warn("Skipped icon. Expected icon "
+                            "item to be a member of a class e.i. 'Icons.add' "
+                            "or something similar, but found '$icon'");
                       }
                     }
                   }
@@ -95,6 +101,8 @@ class IconsBuilder extends SpecBuilder {
 
       if (registrations.isNotEmpty) {
         // build icon registration method
+        output.write(buildFileComments());
+        output.write(importBuilder.buildImports(iconConfig.target));
         output.write(_buildRegisterIconsMethod(registrations.toString()));
 
         // write output to target

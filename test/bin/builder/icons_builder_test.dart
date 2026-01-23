@@ -1,9 +1,8 @@
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../../../bin/src/builders/builder.dart';
 import '../../../bin/src/builders/icons.dart';
 
-/// Dart tests.
 void main() {
 
   test('Test new icon spec format', () async {

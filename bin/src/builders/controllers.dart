@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:analyzer/dart/element/element.dart';
 
 import '../utils/cli_log.dart';
+import '../utils/import_utils.dart';
 import '../utils/path_resolver.dart';
 import '../utils/source_analyzer.dart';
 import 'builder.dart';
@@ -17,15 +18,16 @@ class ControllerBuilder extends SpecBuilder {
     final result = BuilderResult();
     if (_isOkToBuild()) {
       final output = StringBuffer();
-      final imports = StringBuffer();
       final registrations = StringBuffer();
       final analyzer = SourceAnalyzer();
       final defaultSources = ["lib/xwidget/controllers/**.dart"]; // hardcoding the path here is a hack
       final sourceManifest = await analyzer.getSourceManifest(controllerConfig.sources, defaultSources);
       final libraryElements = await analyzer.getLibraryElements(sourceManifest.paths);
+      final targetUri = await PathResolver.relativeToAbsolute(controllerConfig.target);
+      final importBuilder = ImportBuilder();
 
-      output.write(buildFileComments());
-      imports.write(buildImports([], controllerConfig.imports));
+      await importBuilder.loadLibraries(libraryElements.values, false);
+      importBuilder.addImports(controllerConfig.imports);
 
       // build controller registrations
       for (final path in sourceManifest.paths) {
@@ -35,7 +37,7 @@ class ControllerBuilder extends SpecBuilder {
             if (element is ClassElement) {
               for (final interfaceType in element.allSupertypes) {
                 if (getInterfaceElementFQN(interfaceType.element) == "package:xwidget/src/custom/controller.dart::Controller") {
-                  imports.write(_buildControllerImport(element));
+                  importBuilder.addImport(element.source.uri.toString());
                   registrations.write(_buildRegisterControllerCall(element));
                 }
               }
@@ -47,12 +49,11 @@ class ControllerBuilder extends SpecBuilder {
       }
 
       if (registrations.isNotEmpty) {
-        output.write(imports.toString());
-        output.writeln();
+        output.write(buildFileComments());
+        output.write(importBuilder.buildImports(controllerConfig.target));
         output.write(_buildRegisterControllersMethod(registrations.toString()));
 
         // write output to target
-        final targetUri = await PathResolver.relativeToAbsolute(controllerConfig.target);
         final targetFile = await File(targetUri.path).create(recursive: true);
         await targetFile.writeAsString(output.toString());
         result.outputs.add(targetFile);
@@ -62,10 +63,6 @@ class ControllerBuilder extends SpecBuilder {
       }
     }
     return result;
-  }
-
-  String _buildControllerImport(ClassElement element) {
-    return "import '${element.source.uri}';\n";
   }
 
   String _buildRegisterControllersMethod(String registrationCalls) {

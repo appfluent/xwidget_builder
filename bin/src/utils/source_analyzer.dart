@@ -12,21 +12,29 @@ import 'cli_log.dart';
 import 'path_resolver.dart';
 
 class SourceAnalyzer {
+  final String? sdkPath;
+
+  SourceAnalyzer({this.sdkPath});
+
   Future<Map<String, LibraryElement>> getLibraryElements(
       Iterable<String> sources
   ) async {
     final libraryElements = <String, LibraryElement>{};
     final manifest = await getSourceManifest(sources);
     final collection = AnalysisContextCollection(
-        includedPaths: manifest.paths.toList(),
-        resourceProvider: PhysicalResourceProvider.INSTANCE);
+      includedPaths: manifest.paths.toList(),
+      resourceProvider: PhysicalResourceProvider.INSTANCE,
+      sdkPath: sdkPath
+    );
 
     for (final path in manifest.paths) {
       final currentSession = collection.contextFor(path).currentSession;
-      libraryElements[path] = await currentSession
-          .getLibraryByUri("file://$path")
-          .then((libraryResult) => (libraryResult as LibraryElementResult).element);
-      CliLog.success("Analyzed source '${basename(path)}'");
+      final result = await currentSession.getLibraryByUri("file://$path");
+
+      if (result is LibraryElementResult) {
+        libraryElements[path] = result.element;
+        CliLog.success("Analyzed source '${basename(path)}'");
+      }
     }
     return libraryElements;
   }
@@ -50,8 +58,8 @@ class SourceAnalyzer {
               paths.add(entityPath);
             }
           } else if (basename(absolutePath) == basename(entityPath)) {
-            CliLog.warn("Glob '$source' matches a directory. Add a file "
-                "name or use globs (**.dart) to match specific files or "
+            CliLog.warn("Glob '$source' matches a directory. Add a "
+                "file name or use globs (**.dart) to match specific files or "
                 "file patterns.");
           }
         }
@@ -68,4 +76,9 @@ class SourceManifest {
   final Set<String> paths;
 
   SourceManifest(this.files, this.paths);
+
+  @override
+  String toString() {
+    return 'SourceManifest{files: $files, paths: $paths}';
+  }
 }

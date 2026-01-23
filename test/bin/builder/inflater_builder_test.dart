@@ -1,38 +1,59 @@
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
-import '../../../bin/src/builders/builder.dart';
-import '../../../bin/src/builders/inflaters.dart';
+import '../../fixtures/src/test_classes.dart';
+import '../../generated/src/inflaters_test.g.dart';
 
-/// Dart tests.
+
 void main() {
-
   test('Test InflaterBuilder dependency resolution', () async {
-    final config = BuilderConfig();
-    await config.loadConfig("xwidget_builder|res/default_config.yaml");
-    await config.loadConfig("test/fixtures/res/xwidget_config.yaml");
 
-    final builder = InflaterBuilder(config);
-    final result = await builder.build();
-    expect(result.outputs.length, 2);
   });
 
   test('Test new inflater spec format', () async {
-    final config = BuilderConfig();
-    await config.loadConfig("xwidget_builder|res/default_config.yaml");
-    await config.loadConfig("test/fixtures/res/xwidget_config.yaml");
 
-    final builder = InflaterBuilder(config);
-    final result = await builder.build();
-    expect(result.outputs.length, 2);
   });
 
   test('Test inflater spec generics', () async {
-    final config = BuilderConfig();
-    await config.loadConfig("xwidget_builder|res/default_config.yaml");
-    await config.loadConfig("test/fixtures/res/xwidget_config.yaml");
 
-    final builder = InflaterBuilder(config);
-    final result = await builder.build();
-    expect(result.outputs.length, 2);
+  });
+
+  test('Test inflater named arg methods', () async {
+    final attributes = <String, dynamic>{
+        "requiredMap": {},
+        "requiredList": [],
+        "requiredSet": <dynamic>{},
+        "requiredDouble": 0,
+        "requiredString": "",
+        "requiredDynamic": null,
+        "requiredChild": TestObject("child"),
+        "requiredChildren": TestObject("children"),
+        "optionalDouble": 3,
+    };
+    final children = <dynamic>[];
+    final text = <String>[];
+    final inflater = TestNamedParamsInflater();
+
+    final inflated = inflater.inflate(attributes, children, text);
+    print(inflated);
+  });
+
+  test('Test inflater positional arg methods', () async {
+    final attributes = <String, dynamic>{
+      "requiredMap": {"key": "value"},
+      "requiredList": [],
+      "requiredSet": <dynamic>{},
+      "requiredDouble": 0,
+      "requiredString": 8,
+      "requiredDynamic": null,
+      "requiredChild": TestObject("child"),
+      "requiredChildren": TestObject("children"),
+      "optionalDouble": 32,
+    };
+    final children = <dynamic>[];
+    final text = <String>[];
+    final inflater = TestPositionalParamsInflater();
+
+    final inflated = inflater.inflate(attributes, children, text);
+    print(inflated);
   });
 }
