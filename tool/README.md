@@ -23,3 +23,8 @@ dart pub publish --dry-run
 git push --delete origin TAGNAME
 git tag -d TAGNAME
 ```
+
+```shell
+dart pub global activate --source path .
+dart compile exe bin/xc.dart -o ~/.pub-cache/bin/xc
+```

@@ -3,31 +3,24 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../fixtures/src/test_classes.dart';
 import '../../generated/src/inflaters_test.g.dart';
 
-
 void main() {
-  test('Test InflaterBuilder dependency resolution', () async {
+  test('Test InflaterBuilder dependency resolution', () async {});
 
-  });
+  test('Test new inflater spec format', () async {});
 
-  test('Test new inflater spec format', () async {
-
-  });
-
-  test('Test inflater spec generics', () async {
-
-  });
+  test('Test inflater spec generics', () async {});
 
   test('Test inflater named arg methods', () async {
     final attributes = <String, dynamic>{
-        "requiredMap": {},
-        "requiredList": [],
-        "requiredSet": <dynamic>{},
-        "requiredDouble": 0,
-        "requiredString": "",
-        "requiredDynamic": null,
-        "requiredChild": TestObject("child"),
-        "requiredChildren": TestObject("children"),
-        "optionalDouble": 3,
+      "requiredMap": {},
+      "requiredList": [],
+      "requiredSet": <dynamic>{},
+      "requiredDouble": 0,
+      "requiredString": "",
+      "requiredDynamic": null,
+      "requiredChild": TestObject("child"),
+      "requiredChildren": TestObject("children"),
+      "optionalDouble": 3,
     };
     final children = <dynamic>[];
     final text = <String>[];

@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-
-import '../../../bin/src/utils/yaml_editor.dart';
-
+import 'package:xwidget_builder/src/utils/yaml_editor.dart';
 
 void main() {
   group('Basic Operations', () {
@@ -278,7 +276,11 @@ flutter:
 
       // Empty map in YAML might be parsed as null, so check for that
       final flutterValue = editor.get('flutter');
-      expect(flutterValue == null || flutterValue is Map, isTrue, reason: 'flutter should be null or a Map');
+      expect(
+        flutterValue == null || flutterValue is Map,
+        isTrue,
+        reason: 'flutter should be null or a Map',
+      );
     });
 
     test('should add to correct flutter section', () {

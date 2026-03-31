@@ -1,16 +1,13 @@
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../../../bin/src/builders/inflaters.dart';
-import '../../../bin/src/utils/source_analyzer.dart';
+import 'package:xwidget_builder/src/builders/inflaters.dart';
+import 'package:xwidget_builder/src/utils/source_analyzer.dart';
 
 const sdkPath = '/Users/cbarlow/Development/flutter/bin/cache/dart-sdk';
 
 void main() async {
   final analyzer = SourceAnalyzer(sdkPath: sdkPath);
-  final libraries = await analyzer.getLibraryElements([
-    "test/fixtures/src/test_classes.dart"
-  ]);
+  final libraries = await analyzer.getLibraryElements(["test/fixtures/src/test_classes.dart"]);
 
   final library = libraries.values.first;
   final typeProvider = library.typeProvider;
@@ -63,8 +60,8 @@ void main() async {
     final vTypeArg = nullableStringType;
     final resolver = InflaterContext(mapElement, [kTypeArg, vTypeArg]);
     final mapType = mapElement.instantiate(
-        typeArguments: [kTypeParam, vTypeParam],
-        nullabilitySuffix: NullabilitySuffix.none
+      typeArguments: [kTypeParam, vTypeParam],
+      nullabilitySuffix: NullabilitySuffix.none,
     );
     final result = resolver.resolveToString(mapType);
     expect(mapType.getDisplayString(), "Map<K, V?>");
@@ -79,12 +76,12 @@ void main() async {
     final vTypeArg = nullableStringType;
     final resolver = InflaterContext(mapElement, [kTypeArg, vTypeArg]);
     final listType = listElement.instantiate(
-        typeArguments: [vTypeParam],
-        nullabilitySuffix: NullabilitySuffix.none
+      typeArguments: [vTypeParam],
+      nullabilitySuffix: NullabilitySuffix.none,
     );
     final mapType = mapElement.instantiate(
-        typeArguments: [kTypeParam, listType],
-        nullabilitySuffix: NullabilitySuffix.none
+      typeArguments: [kTypeParam, listType],
+      nullabilitySuffix: NullabilitySuffix.none,
     );
     final result = resolver.resolveToString(mapType);
     expect(mapType.getDisplayString(), "Map<K, List<V?>>");
@@ -97,12 +94,12 @@ void main() async {
     final vTypeParam = typeParams[1].instantiate(nullabilitySuffix: NullabilitySuffix.question);
     final resolver = InflaterContext(mapElement, []);
     final listType = listElement.instantiate(
-        typeArguments: [vTypeParam],
-        nullabilitySuffix: NullabilitySuffix.none
+      typeArguments: [vTypeParam],
+      nullabilitySuffix: NullabilitySuffix.none,
     );
     final mapType = mapElement.instantiate(
-        typeArguments: [kTypeParam, listType],
-        nullabilitySuffix: NullabilitySuffix.none
+      typeArguments: [kTypeParam, listType],
+      nullabilitySuffix: NullabilitySuffix.none,
     );
     final result = resolver.resolveToString(mapType);
     expect(mapType.getDisplayString(), "Map<K, List<V?>>");
@@ -117,12 +114,12 @@ void main() async {
     final vTypeArg = nullableStringType;
     final resolver = InflaterContext(mapElement, [kTypeArg, vTypeArg]);
     final listType = listElement.instantiate(
-        typeArguments: [vTypeParam],
-        nullabilitySuffix: NullabilitySuffix.none
+      typeArguments: [vTypeParam],
+      nullabilitySuffix: NullabilitySuffix.none,
     );
     final mapType = mapElement.instantiate(
-        typeArguments: [kTypeParam, listType],
-        nullabilitySuffix: NullabilitySuffix.none
+      typeArguments: [kTypeParam, listType],
+      nullabilitySuffix: NullabilitySuffix.none,
     );
     final result = resolver.resolveToType(mapType);
     expect(mapType.getDisplayString(), "Map<K, List<V?>>");

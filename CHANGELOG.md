@@ -1,3 +1,15 @@
+## 0.3.0 (Mar 31, 2026)
+
+### Added
+- Cloud management CLI — deploy, promote, and manage workspaces, projects, channels, and deployments via `xc cloud`.
+- Analytics CLI — query render, download, error, and page transition data via `xc analytics`.
+- Project key rotation with configurable grace periods (0–90 days).
+- `xc` top-level CLI entry point for all XWidget Builder commands.
+- Full documentation site at docs.xwidget.dev.
+
+### Changed
+- Updated minimum Dart SDK to 3.8.
+
 ## 0.2.1
 
 * Resolved major pain points with default values and imports. Constructor defaults now

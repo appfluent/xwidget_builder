@@ -1,6 +1,3 @@
-
-
-
 import 'dart:ui';
 
 const _privateDefaultValue = "privateDefault";
@@ -17,22 +14,15 @@ class TestObject {
   }
 }
 
-class TestTypeParameters<K,V> {
+class TestTypeParameters<K, V> {
   final K key;
-  final Map<K,V>? map;
+  final Map<K, V>? map;
   final List<V>? list;
   final Map<K, List<V?>>? cache1;
   final Map<String, List<String?>>? cache2;
   final BoxHeightStyle Function({int height})? func;
 
-  TestTypeParameters(
-      this.key,
-      this.map,
-      this.list,
-      this.cache1,
-      this.cache2,
-      this.func
-  );
+  TestTypeParameters(this.key, this.map, this.list, this.cache1, this.cache2, this.func);
 
   TestTypeParameters.named({
     required this.key,
@@ -40,7 +30,7 @@ class TestTypeParameters<K,V> {
     this.list,
     this.cache1,
     this.cache2,
-    this.func
+    this.func,
   });
 }
 
@@ -51,10 +41,9 @@ class TestDefaults {
 
   TestDefaults(
     this.noDefault, [
-      this.privateDefault = _privateDefaultValue,
-      this.publicDefault = publicDefaultValue
-    ]
-  );
+    this.privateDefault = _privateDefaultValue,
+    this.publicDefault = publicDefaultValue,
+  ]);
 
   @override
   String toString() {
@@ -62,7 +51,7 @@ class TestDefaults {
         'noDefault: $noDefault, '
         'privateDefault: $privateDefault, '
         'publicDefault: $publicDefault'
-    '}';
+        '}';
   }
 }
 
@@ -84,7 +73,6 @@ class TestNamedParams {
   final dynamic optionalDynamic;
   final TestObject? optionalChild;
   final List<TestObject>? optionalChildren;
-
 
   TestNamedParams({
     required this.requiredMap,
@@ -156,16 +144,15 @@ class TestPositionalParams {
     this.requiredDynamic,
     this.requiredChild,
     this.requiredChildren, [
-      this.optionalMap,
-      this.optionalList,
-      this.optionalSet = const {"defaultSet"},
-      this.optionalDouble,
-      this.optionalString,
-      this.optionalDynamic = "defaultDynamic",
-      this.optionalChild,
-      this.optionalChildren,
-    ]
-  );
+    this.optionalMap,
+    this.optionalList,
+    this.optionalSet = const {"defaultSet"},
+    this.optionalDouble,
+    this.optionalString,
+    this.optionalDynamic = "defaultDynamic",
+    this.optionalChild,
+    this.optionalChildren,
+  ]);
 
   @override
   String toString() {
@@ -186,6 +173,6 @@ class TestPositionalParams {
         '  optionalDynamic: $optionalDynamic,\n'
         '  optionalChild: $optionalChild,\n'
         '  optionalChildren: $optionalChildren\n'
-    '}';
+        '}';
   }
 }

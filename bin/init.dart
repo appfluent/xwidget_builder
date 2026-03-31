@@ -1,1 +1,1 @@
-export 'src/initialize.dart';
+export 'package:xwidget_builder/src/initialize.dart';

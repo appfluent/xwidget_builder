@@ -1,10 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-
-import '../../../bin/src/builders/builder.dart';
-import '../../../bin/src/builders/icons.dart';
+import 'package:xwidget_builder/src/builders/builder.dart';
+import 'package:xwidget_builder/src/builders/icons.dart';
 
 void main() {
-
   test('Test new icon spec format', () async {
     final config = BuilderConfig();
     await config.loadConfig("xwidget|res/default_config.yaml");

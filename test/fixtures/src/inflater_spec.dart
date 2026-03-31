@@ -8,7 +8,6 @@ import 'test_classes.dart';
 // ignore_for_file: unused_element
 
 const inflaters = [
-
   // material widgets
   AlertDialog,
   AlwaysStoppedAnimation,
@@ -37,5 +36,5 @@ const inflaters = [
   TestTypeParameters<String, String>,
   TestTypeParameters<String, TestObject?>,
   TestNamedParams,
-  TestPositionalParams
+  TestPositionalParams,
 ];

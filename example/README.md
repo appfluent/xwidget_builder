@@ -1,51 +1,57 @@
-# App Initialization
+# Examples
 
-The easies way to get stated is by letting XWidget initialize your project for you.
+Common usage examples for XWidget Builder commands.
 
-Installs XWidget dependencies and installs required configuration files, but does not overwrite
-existing files.
+## Project Setup
+
+Initialize an existing Flutter project for XWidget:
 ```shell
-$ dart run xwidget_builder:init
+dart run xwidget_builder:init
 ```
 
-Installs XWidget dependencies and installs a basic example app, overwriting existing files.
+Scaffold a new XWidget app with working examples:
 ```shell
-$ dart run xwidget_builder:int --new-app
+dart run xwidget_builder:init --new-app
 ```
 
-Displays usage help
+## Code Generation
+
+Generate all components:
 ```shell
-$ dart run xwidget_builder:generate --help
+dart run xwidget_builder:generate
 ```
 
-# Code Generation
-
-Once you've initialized you app, use the following commands to generate XWidget components
-
-To generate inflaters, controllers, and other required files, run the following command:
+Generate only inflaters:
 ```shell
-$ dart run xwidget_builder:generate
+dart run xwidget_builder:generate --only inflaters
 ```
 
-To see available options and flags, use:
+## Cloud
+
+Authenticate and deploy:
 ```shell
-$ dart run xwidget_builder:generate --help
+dart run xwidget_builder:xc cloud login
+dart run xwidget_builder:xc cloud deploy -c staging -v 1.0.0
 ```
 
-You can also specify a custom configuration file:
+Promote a deployment from staging to production:
 ```shell
-$ dart run xwidget_builder:generate --config "my_config.yaml"
+dart run xwidget_builder:xc cloud promote --from staging --to production -v 1.0.0
 ```
 
-To generate only specific components, use the --only flag:
+## Analytics
+
+Query render and download analytics:
 ```shell
-$ dart run xwidget_builder:generate --only inflaters,controllers,icons
+dart run xwidget_builder:xc analytics renders -c production -r 30
+dart run xwidget_builder:xc analytics downloads -c production
 ```
 
-If you need to support deprecated APIs, use:
+## Help
 ```shell
-$ dart run xwidget_builder:generate --allow-deprecated
+dart run xwidget_builder:xc --help
+dart run xwidget_builder:xc cloud --help
+dart run xwidget_builder:xc analytics --help
 ```
 
-The generated files will be placed in the appropriate directories as specified
-in xwidget_config.yaml.
+For full documentation, visit [docs.xwidget.dev](https://docs.xwidget.dev).
