@@ -1,3 +1,9 @@
+## 0.3.1 (Apr 1, 2026)
+
+### Fixed
+
+- Fixed `xc init --new-app` not copying `fragment/count.xml` to the resources folder
+
 ## 0.3.0 (Mar 31, 2026)
 
 ### Added

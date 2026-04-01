@@ -30,6 +30,7 @@ class InitializeCommand extends FlexCommand {
     "$exampleDir/lib/xwidget/controllers/app_controller.dart":
         "lib/xwidget/controllers/app_controller.dart",
     "$exampleDir/resources/fragments/my_app.xml": "resources/fragments/my_app.xml",
+    "$exampleDir/resources/fragments/count.xml": "resources/fragments/count.xml",
   };
 
   static const builderPackage = "xwidget_builder";
