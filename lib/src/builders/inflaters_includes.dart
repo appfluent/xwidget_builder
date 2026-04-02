@@ -64,6 +64,27 @@ class InflaterArgs {
     }
   }
 
+  void addFnArg(
+      String name,
+      dynamic Function(Function fn) adapter,
+      bool isRequired,
+      bool isPositional,
+      dynamic defaultValue,
+  ) {
+    final isPresent = _isPresent(name, defaultValue);
+    if (isRequired && !isPresent) {
+      throw Exception("Argument '\$name' of type 'Function' is required");
+    }
+    if (isPresent) {
+      final arg = _getArgValue(name, defaultValue);
+      if (arg is Function) {
+        _addArg(name, adapter(arg), isPositional);
+      } else {
+        _addArg(name, arg, isPositional);
+      }
+    }
+  }
+
   bool _isPresent(String name, dynamic defaultValue) {
     // check for a key instead of a null value, because the user may have
     // intentionally set the value to null which means it should be passed

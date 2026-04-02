@@ -68,7 +68,7 @@ class InflaterBuilder extends SpecBuilder {
         final contexts = <InflaterContext>[];
         if (element.name == "inflaters") {
           // found a list of class to create inflaters for
-          final inflaterSpecs = element.variable2?.computeConstantValue()?.toListValue();
+          final inflaterSpecs = element.variable2?.computeConstantValue()?.toListValue()?.toSet();
           if (inflaterSpecs != null) {
             for (final inflaterSpec in inflaterSpecs) {
               final inflaterType = inflaterSpec.toTypeValue();
@@ -257,6 +257,19 @@ class InflaterBuilder extends SpecBuilder {
 
       code.write(
         "args.addArg<$listItemType>('$paramName', $coreType, $isRequired, $isPositional, $defaultValue);",
+      );
+    } else if (paramType is FunctionType) {
+      final fnType = paramType;
+      final returnType = context.resolveToString(fnType.returnType);
+      final paramCount = fnType.parameters.length;
+      final paramStr = List.generate(paramCount, (i) => 'p$i').join(', ');
+      final returnCast = returnType == 'void' ? '' : ' as $returnType';
+
+      importBuilder.addImportsForType(context.resolveToType(fnType.returnType));
+
+      code.write(
+        "args.addFnArg('$paramName', (fn) => ($paramStr) => "
+        "Function.apply(fn, [$paramStr])$returnCast, $isRequired, $isPositional, $defaultValue);",
       );
     } else {
       final coreType = paramType.coreType()?.getBaseTypeName();

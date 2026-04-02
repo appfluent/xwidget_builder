@@ -73,7 +73,10 @@ class IconsBuilder extends SpecBuilder {
                   }
                 } else if (element.name == "iconSets") {
                   // found a list of icon sets
-                  final iconSets = element.variable2?.computeConstantValue()?.toListValue();
+                  final iconSets = element.variable2
+                      ?.computeConstantValue()
+                      ?.toListValue()
+                      ?.toSet();
                   if (iconSets != null) {
                     for (final iconSet in iconSets) {
                       final element = iconSet.toTypeValue()?.element;
