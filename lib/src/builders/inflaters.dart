@@ -260,16 +260,31 @@ class InflaterBuilder extends SpecBuilder {
       );
     } else if (paramType is FunctionType) {
       final fnType = paramType;
-      final returnType = context.resolveToString(fnType.returnType);
+      final resolvedReturnType = context.resolveToType(fnType.returnType);
+      final returnTypeStr = context.resolveToString(fnType.returnType);
       final paramCount = fnType.parameters.length;
       final paramStr = List.generate(paramCount, (i) => 'p$i').join(', ');
-      final returnCast = returnType == 'void' ? '' : ' as $returnType';
 
-      importBuilder.addImportsForType(context.resolveToType(fnType.returnType));
+      String returnExpr;
+      if (returnTypeStr == 'void') {
+        returnExpr = 'Function.apply(fn, [$paramStr])';
+      } else if (_isCoreCollection(resolvedReturnType)) {
+        final baseType = resolvedReturnType.element!.name;
+        final typeArgs = (resolvedReturnType as ParameterizedType).typeArguments
+            .map((t) => context.resolveToString(t))
+            .join(', ');
+        returnExpr = '(Function.apply(fn, [$paramStr]) as $baseType).cast<$typeArgs>()';
+        for (final t in (resolvedReturnType).typeArguments) {
+          importBuilder.addImportsForType(context.resolveToType(t));
+        }
+      } else {
+        returnExpr = 'Function.apply(fn, [$paramStr]) as $returnTypeStr';
+        importBuilder.addImportsForType(resolvedReturnType);
+      }
 
       code.write(
-        "args.addFnArg('$paramName', (fn) => ($paramStr) => "
-        "Function.apply(fn, [$paramStr])$returnCast, $isRequired, $isPositional, $defaultValue);",
+        "args.addFnArg('$paramName', (fn) => "
+        "($paramStr) => $returnExpr, $isRequired, $isPositional, $defaultValue);",
       );
     } else {
       final coreType = paramType.coreType()?.getBaseTypeName();
@@ -343,6 +358,13 @@ class InflaterBuilder extends SpecBuilder {
     code.write("        return value;\n");
     code.write("    }\n");
     return code.toString();
+  }
+
+  bool _isCoreCollection(DartType type) {
+    return type.isDartCoreList ||
+        type.isDartCoreSet ||
+        type.isDartCoreIterable ||
+        type.isDartCoreMap;
   }
 
   bool _isOkToBuild() {

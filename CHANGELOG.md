@@ -1,3 +1,9 @@
+## 0.4.1
+
+- Fixed collection return types in function adapters. Parameterized collections
+  (`List`, `Set`, `Iterable`, `Map`) now use `.cast<>()` instead of `as` to satisfy
+  Dart's reified generics.
+
 ## 0.4.0
 
 - **BREAKING:** Requires `xwidget` 0.4.0. Both packages must be upgraded together.
