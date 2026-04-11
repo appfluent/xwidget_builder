@@ -1,3 +1,12 @@
+## 0.4.2
+
+- Fixed inflation of nested parameterized collections (`List<List<Widget>>`,
+  `List<Map<String, String>>`, etc.). Added `castElement` callback to `addArg`
+  that recursively casts inner elements during argument resolution. The inflater
+  generator now emits `_buildCastExpression` lambdas for arbitrary nesting depth.
+- Simplified `<builder>` returnType enumeration from `Widget`, `Widget?`, `List:Widget`,
+  `List:PopupMenuEntry` to `List` and `SingleChild`.
+
 ## 0.4.1
 
 - Fixed collection return types in function adapters. Parameterized collections

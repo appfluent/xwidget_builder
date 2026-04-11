@@ -255,9 +255,17 @@ class InflaterBuilder extends SpecBuilder {
       // only import type we're explicitly creating type arguments for
       importBuilder.addImportsForType(context.resolveToType(listItemType));
 
-      code.write(
-        "args.addArg<$listItemType>('$paramName', $coreType, $isRequired, $isPositional, $defaultValue);",
-      );
+      final castExpr = _buildCastExpression(context, listItemType, 0);
+      if (castExpr != null) {
+        code.write(
+          "args.addArg<$listItemType>('$paramName', $coreType, $isRequired, $isPositional, $defaultValue, "
+          "castElement: (e0) => $castExpr);",
+        );
+      } else {
+        code.write(
+          "args.addArg<$listItemType>('$paramName', $coreType, $isRequired, $isPositional, $defaultValue);",
+        );
+      }
     } else if (paramType is FunctionType) {
       final fnType = paramType;
       final resolvedReturnType = context.resolveToType(fnType.returnType);
@@ -397,6 +405,32 @@ class InflaterBuilder extends SpecBuilder {
               separator +
               constructorName.substring(dotIndex + 1, constructorName.length)
         : constructorName + types;
+  }
+
+  String? _buildCastExpression(InflaterContext context, DartType type, int depth) {
+    final v = 'e$depth';
+    if (type.isDartCoreList || type.isDartCoreIterable) {
+      final innerType = (type as ParameterizedType).typeArguments[0];
+      final resolvedInner = context.resolveToType(innerType);
+      final innerCast = _buildCastExpression(context, resolvedInner, depth + 1);
+      if (innerCast != null) {
+        return '($v as List).map((e${depth + 1}) => $innerCast).toList()';
+      }
+      final innerStr = context.resolveToString(innerType);
+      return '($v as List).cast<$innerStr>()';
+    }
+    if (type.isDartCoreMap) {
+      final typeArgs = (type as ParameterizedType).typeArguments;
+      final keyStr = context.resolveToString(typeArgs[0]);
+      final valStr = context.resolveToString(typeArgs[1]);
+      return '($v as Map).cast<$keyStr, $valStr>()';
+    }
+    if (type.isDartCoreSet) {
+      final innerType = (type as ParameterizedType).typeArguments[0];
+      final innerStr = context.resolveToString(innerType);
+      return '($v as Set).cast<$innerStr>()';
+    }
+    return null;
   }
 
   //=============================================

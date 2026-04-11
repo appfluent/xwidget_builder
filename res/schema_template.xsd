@@ -9,10 +9,8 @@
         <xs:union memberTypes="expressionAttributeType">
             <xs:simpleType>
                 <xs:restriction base="xs:string">
-                    <xs:enumeration value="Widget"/>
-                    <xs:enumeration value="Widget?"/>
-                    <xs:enumeration value="List:Widget"/>
-                    <xs:enumeration value="List:PopupMenuEntry"/>
+                    <xs:enumeration value="List"/>
+                    <xs:enumeration value="SingleChild"/>
                 </xs:restriction>
             </xs:simpleType>
         </xs:union>

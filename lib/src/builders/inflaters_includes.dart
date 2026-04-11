@@ -42,8 +42,9 @@ class InflaterArgs {
       Type? coreType,
       bool isRequired,
       bool isPositional,
-      dynamic defaultValue,
-  ) {
+      dynamic defaultValue, {
+      T Function(dynamic)? castElement,
+  }) {
     final isPresent = _isPresent(name, defaultValue);
     if (isRequired && !isPresent) {
       throw Exception("Argument '\$name' of type '\$T' is required");
@@ -51,9 +52,21 @@ class InflaterArgs {
     if (isPresent) {
       final arg = _getArgValue(name, defaultValue);
       if (coreType == List || coreType == Iterable) {
-        _addArg(name, arg is List ? <T>[...arg] : null, isPositional);
+        if (arg is List) {
+          _addArg(name, castElement != null
+              ? arg.map(castElement).toList()
+              : <T>[...arg], isPositional);
+        } else {
+          _addArg(name, null, isPositional);
+        }
       } else if (coreType == Set) {
-        _addArg(name, arg is Set ? <T>{...arg} : null, isPositional);
+        if (arg is Set) {
+          _addArg(name, castElement != null
+              ? arg.map(castElement).toSet()
+              : <T>{...arg}, isPositional);
+        } else {
+          _addArg(name, null, isPositional);
+        }
       } else if (coreType == String) {
         _addArg(name, arg?.toString(), isPositional);
       } else if (coreType == double) {
