@@ -1,0 +1,26 @@
+name: test_app
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  xwidget: ^0.4.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  xwidget_builder:
+    path: ../../
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - resources/values/
+    - resources/fragments/

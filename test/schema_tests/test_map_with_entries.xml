@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Column xmlns="http://www.appfluent.us/xwidget">
+    <Map>
+        <Entry key="first" value="alpha"/>
+        <Entry key="second" value="beta"/>
+    </Map>
+</Column>

@@ -18,7 +18,7 @@
 
     <xs:simpleType name="expressionAttributeType">
         <xs:restriction base="xs:string">
-            <xs:pattern value="\$\{.*\}" />
+            <xs:pattern value="[$]\{.*\}" />
         </xs:restriction>
     </xs:simpleType>
 
@@ -274,125 +274,333 @@
 
     <xs:complexType name="listItemType">
         <xs:sequence>
-            <xs:any namespace="##targetNamespace" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:group ref="allComponents" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
-        <xs:attribute name="value" use="required"/>
-        <xs:attribute name="visible" type="boolAttributeType"/>
+        <xs:attribute name="value" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en"><![CDATA[<p>The value to add to the list. Supports EL expressions. Required.</p>]]></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="visible" type="boolAttributeType">
+            <xs:annotation>
+                <xs:documentation xml:lang="en"><![CDATA[<p>When <code>false</code>, the item is skipped. Defaults to <code>true</code>.</p>]]></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <xs:complexType name="mapEntryType">
         <xs:sequence>
-            <xs:any namespace="##targetNamespace" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:group ref="allComponents" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
-        <xs:attribute name="key" use="required"/>
-        <xs:attribute name="value"/>
-        <xs:attribute name="visible" type="boolAttributeType"/>
+        <xs:attribute name="key" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en"><![CDATA[<p>The key for this map entry. Required.</p>]]></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="value">
+            <xs:annotation>
+                <xs:documentation xml:lang="en"><![CDATA[<p>The value for this map entry. Supports EL expressions. Optional &mdash; value can also come from a child element or text content.</p>]]></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="visible" type="boolAttributeType">
+            <xs:annotation>
+                <xs:documentation xml:lang="en"><![CDATA[<p>When <code>false</code>, the entry is skipped. Defaults to <code>true</code>.</p>]]></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <xs:complexType name="objectType" mixed="true">
         <xs:sequence>
-            <xs:any namespace="##targetNamespace" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:group ref="allComponents" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
-        <xs:attribute name="for" type="xs:string"/>
-        <xs:attribute name="visible" type="boolAttributeType"/>
+        <xs:attribute name="for" type="xs:string">
+            <xs:annotation>
+                <xs:documentation xml:lang="en"><![CDATA[<p>The name of the parent's attribute to assign this element's value to. When omitted, the element is added to its parent's children collection instead.</p>]]></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="visible" type="boolAttributeType">
+            <xs:annotation>
+                <xs:documentation xml:lang="en"><![CDATA[<p>Controls whether this element is rendered. When <code>false</code>, the element is not inflated and contributes nothing to its parent. Defaults to <code>true</code>.</p>]]></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
 
     <xs:complexType name="paramType">
         <xs:sequence>
-            <xs:any namespace="##targetNamespace" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:group ref="allComponents" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
-        <xs:attribute name="name" use="required"/>
-        <xs:attribute name="value"/>
-        <xs:attribute name="visible" type="boolAttributeType"/>
+        <xs:attribute name="name" use="required">
+            <xs:annotation>
+                <xs:documentation xml:lang="en"><![CDATA[<p>The parameter name (key). Required.</p>]]></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="value">
+            <xs:annotation>
+                <xs:documentation xml:lang="en"><![CDATA[<p>The parameter value. Supports EL expressions. Optional &mdash; value can also come from a child element or text content.</p>]]></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="visible" type="boolAttributeType">
+            <xs:annotation>
+                <xs:documentation xml:lang="en"><![CDATA[<p>When <code>false</code>, the parameter is skipped. Defaults to <code>true</code>.</p>]]></xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
     </xs:complexType>
+
+    <!-- ====================================================================
+         Component groups
+         ==================================================================== -->
+
+    <!-- Lowercase structural tags. -->
+    <xs:group name="builtinTags">
+        <xs:choice>
+            <xs:element ref="builder"/>
+            <xs:element ref="callback"/>
+            <xs:element ref="debug"/>
+            <xs:element ref="forEach"/>
+            <xs:element ref="forLoop"/>
+            <xs:element ref="fragment"/>
+            <xs:element ref="if"/>
+            <xs:element ref="var"/>
+        </xs:choice>
+    </xs:group>
+
+    <!-- Hardcoded capitalized inflater elements. Generated inflaters
+         (Column, Container, etc.) live in `generatedInflaters`, which is
+         emitted by xwidget_builder. -->
+    <xs:group name="builtinInflaters">
+        <xs:choice>
+            <xs:element ref="Controller"/>
+            <xs:element ref="DynamicBuilder"/>
+            <xs:element ref="EventListener"/>
+            <xs:element ref="List"/>
+            <xs:element ref="Map"/>
+            <xs:element ref="MediaQuery"/>
+            <xs:element ref="ValueListener"/>
+        </xs:choice>
+    </xs:group>
+
+    <!-- Context-restricted elements: defined for completeness, but
+         intentionally NOT in `allComponents`. Each is only valid inside
+         specific parent elements:
+           - else: inside `if`
+           - param: inside `fragment`, `if`, `else`, `forEach`, `forLoop`
+           - Entry: inside `Map`
+           - Item: inside `List`
+         Their parent elements reference them explicitly. -->
+    <xs:group name="contextRestricted">
+        <xs:choice>
+            <xs:element ref="else"/>
+            <xs:element ref="param"/>
+            <xs:element ref="Entry"/>
+            <xs:element ref="Item"/>
+        </xs:choice>
+    </xs:group>
+
+    <!-- Umbrella group: everything that can appear as a child of a widget. -->
+    <xs:group name="allComponents">
+        <xs:choice>
+            <xs:group ref="builtinTags"/>
+            <xs:group ref="builtinInflaters"/>
+            <xs:group ref="generatedInflaters"/>
+        </xs:choice>
+    </xs:group>
+
+    <!-- Top-level element declarations for context-restricted elements
+         (referenced from parent content models and from `contextRestricted`
+         group above). -->
+    <xs:element name="param" type="paramType">
+        <xs:annotation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Defines a named parameter as a key-value pair. Inside <code>&lt;fragment&gt;</code>, parameters are added to the fragment's dependencies before inflation. Inside <code>&lt;Map&gt;</code>, it behaves like <code>&lt;Entry&gt;</code> but uses <code>name</code> instead of <code>key</code>. Also valid inside <code>&lt;if&gt;</code>, <code>&lt;else&gt;</code>, <code>&lt;forEach&gt;</code>, and <code>&lt;forLoop&gt;</code>.</p><br/>
+<p>The value can come from the <code>value</code> attribute, a single child element, or text content &mdash; checked in that order.</p>]]></xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="Entry" type="mapEntryType">
+        <xs:annotation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Represents a single key-value pair in a <code>&lt;Map&gt;</code>. The value can come from the <code>value</code> attribute, a single child element, or text content &mdash; checked in that order. Must be a direct child of <code>&lt;Map&gt;</code>.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/components/map/">docs.xwidget.dev/references/components/map</a></p>]]></xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="Item" type="listItemType">
+        <xs:annotation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Represents a single value in a <code>&lt;List&gt;</code>. Use this when the item value comes from an EL expression or other dynamic source. Must be a direct child of <code>&lt;List&gt;</code>.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/components/list/">docs.xwidget.dev/references/components/list</a></p>]]></xs:documentation>
+        </xs:annotation>
+    </xs:element>
 
     <!-- built-in tag elements -->
 
     <xs:element name="builder">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Wraps its children in a builder function. Useful for Flutter widgets that require one &mdash; <code>PageView.builder</code>, <code>ListView.builder</code>, <code>LayoutBuilder</code>, and others that defer child construction until the builder is invoked.</p><br/>
+<p>When the builder runs, named arguments declared in <code>vars</code> become accessible to children via EL expressions. <code>BuildContext</code> arguments are never stored as dependencies, even if explicitly named, because that would cause a memory leak.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/tags/builder/">docs.xwidget.dev/references/tags/builder</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType >
             <xs:sequence>
-                <xs:any namespace="##targetNamespace" minOccurs="1" maxOccurs="unbounded"/>
+                <xs:group ref="allComponents" minOccurs="1" maxOccurs="unbounded"/>
             </xs:sequence>
-            <xs:attribute name="for" type="xs:string"/>
-            <xs:attribute name="vars" type="xs:string"/>
-            <xs:attribute name="returnType" type="builderReturnTypeAttributeType"/>
-            <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType"/>
+            <xs:attribute name="for" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>The parent's attribute to assign the builder function to (e.g. <code>itemBuilder</code>, <code>builder</code>). Required.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="vars" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Comma-separated list of builder function argument names, maximum 5. Named arguments become available to children as dependencies. Use <code>_</code> to ignore an argument.</p><br/>
+<p>Example: <code>vars="_,index"</code> ignores the first argument (typically <code>BuildContext</code>) and exposes the second as <code>index</code>.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="returnType" type="builderReturnTypeAttributeType">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Set to a List type (e.g. <code>List:PopupMenuEntry</code>) when the builder must return a list of inflated children rather than a single child. Omit for single-child builders &mdash; type adaptation is automatic.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Controls how <code>Dependencies</code> are passed to the builder's children. Defaults to <code>inherit</code>, or <code>copy</code> when <code>vars</code> are declared (so loop variables don't leak to the parent).</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="callback">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Binds an event handler that evaluates an EL expression when the event fires. For simple handlers that take no arguments, bind directly with EL instead &mdash; <code>onPressed="${onPressed}"</code> &mdash; which is sufficient in most cases.</p><br/>
+<p>Use <code>&lt;callback&gt;</code> when you need to pass arguments to the handler, capture handler arguments as dependencies, or store the return value.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/tags/callback/">docs.xwidget.dev/references/tags/callback</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType >
-            <xs:attribute name="for" type="xs:string" use="required"/>
-            <xs:attribute name="action" type="xs:string" use="required"/>
-            <xs:attribute name="returnVar" type="xs:string"/>
-            <xs:attribute name="vars" type="xs:string"/>
-            <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType"/>
+            <xs:attribute name="for" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>The parent's event attribute to bind the handler to (e.g. <code>onPressed</code>, <code>onTap</code>). Required.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="action" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>EL expression evaluated when the event fires. Required.</p><br/>
+<p><strong>Do NOT wrap the expression in <code>${...}</code></strong> &mdash; that causes it to evaluate immediately when the callback is created instead of when the event fires.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="returnVar" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Dependency key in which to store the action's return value. Useful when the action computes something that subsequent code needs.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="vars" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Comma-separated names for the handler's arguments, maximum 5. Named arguments are added to dependencies during action evaluation. Use <code>_</code> to ignore an argument.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Controls how <code>Dependencies</code> are scoped during action evaluation. Defaults to <code>inherit</code>, or <code>copy</code> when <code>vars</code> or <code>returnVar</code> are present.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="debug">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Writes a debug-level message to the standard Dart logger (<code>Logger("DebugTag")</code>). Useful for tracing fragment inflation and verifying which branches of conditional or loop tags are reached during development.</p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attribute name="message" type="xs:string" use="required"/>
+            <xs:attribute name="message" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>The text or EL expression to log at <code>fine</code> severity. Required.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="forEach">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Iterates over a <code>List</code>, <code>Set</code>, or <code>Map</code>, inflating its children for each item. The current item is stored as a dependency under the name given by <code>var</code>.</p><br/>
+<p>When iterating a <code>Map</code>, each item is exposed as a map with <code>key</code> and <code>value</code> entries.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/tags/for_each/">docs.xwidget.dev/references/tags/for_each</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:sequence>
-                <xs:any namespace="##targetNamespace" minOccurs="1" maxOccurs="unbounded"/>
-            </xs:sequence>
-            <xs:attribute name="var" type="xs:string" use="required"/>
-            <xs:attribute name="indexVar" type="xs:string"/>
-            <xs:attribute name="items" type="xs:string" use="required"/>
-            <xs:attribute name="groupSize" type="integerAttributeType"/>
-            <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType"/>
+            <xs:choice minOccurs="1" maxOccurs="unbounded">
+                <xs:group ref="allComponents"/>
+                <xs:element ref="param"/>
+            </xs:choice>
+            <xs:attribute name="var" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Dependency key under which the current item is stored during each iteration. Required.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="indexVar" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Dependency key under which the current iteration index (or group index, when <code>groupSize</code> &gt; 1) is stored.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="items" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>The collection to iterate over &mdash; a <code>List</code>, <code>Set</code>, or <code>Map</code>. Typically an EL expression. Required.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="groupSize" type="integerAttributeType">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Number of items per group. When greater than 1, <code>var</code> receives a list of items per group instead of a single item &mdash; useful for multi-column layouts. Defaults to <code>1</code>.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Controls how <code>Dependencies</code> are scoped to each iteration. Defaults to <code>copy</code> so loop variables don't leak to the parent.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="forLoop">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Iterates a fixed number of times using a numeric counter. The counter runs from <code>begin</code> (inclusive) to <code>end</code> (exclusive), advancing by <code>step</code>. Negative <code>step</code> values count down.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/tags/for_loop/">docs.xwidget.dev/references/tags/for_loop</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:sequence>
-                <xs:any namespace="##targetNamespace" minOccurs="1" maxOccurs="unbounded"/>
-            </xs:sequence>
-            <xs:attribute name="var" type="xs:string" use="required"/>
-            <xs:attribute name="begin" type="integerAttributeType"/>
-            <xs:attribute name="end" type="integerAttributeType"/>
-            <xs:attribute name="step" type="integerAttributeType"/>
-            <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType"/>
+            <xs:choice minOccurs="1" maxOccurs="unbounded">
+                <xs:group ref="allComponents"/>
+                <xs:element ref="param"/>
+            </xs:choice>
+            <xs:attribute name="var" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Dependency key under which the current counter value is stored. Required.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="begin" type="integerAttributeType">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Starting counter value, inclusive. Defaults to <code>0</code>.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="end" type="integerAttributeType">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Ending counter value, exclusive. Defaults to <code>0</code>.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="step" type="integerAttributeType">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Increment per iteration. Cannot be zero. Negative values count down. Defaults to <code>1</code>.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Controls how <code>Dependencies</code> are scoped to each iteration. Defaults to <code>copy</code>.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="fragment">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Renders a named UI fragment. Fragment names support folder paths (e.g. <code>auth/login</code>) and HTML-style query parameters (e.g. <code>settings?tab=profile</code>).</p><br/>
+<p>Any attributes other than <code>for</code>, <code>name</code>, and <code>visible</code> are forwarded to the child fragment as inherited attributes. For explicit named parameters, use <code>&lt;param&gt;</code> child elements.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/tags/fragment/">docs.xwidget.dev/references/tags/fragment</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:element name="forEach" form="qualified">
                     <xs:complexType>
                         <xs:sequence>
-                            <xs:element name="param" type="paramType" form="qualified"/>
+                            <xs:element ref="param"/>
                         </xs:sequence>
                         <xs:attribute name="var" type="xs:string" use="required"/>
                         <xs:attribute name="indexVar" type="xs:string"/>
@@ -405,54 +613,89 @@
                 <xs:element name="if" form="qualified">
                     <xs:complexType>
                         <xs:choice maxOccurs="unbounded">
-                            <xs:element name="param" type="paramType" form="qualified"/>
+                            <xs:element ref="param"/>
                         </xs:choice>
                         <xs:attribute name="test" type="xs:string" use="required"/>
                     </xs:complexType>
                 </xs:element>
-                <xs:element name="param" type="paramType" form="qualified"/>
+                <xs:element ref="param"/>
             </xs:choice>
-            <xs:attribute name="for" type="xs:string"/>
-            <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="visible" type="boolAttributeType"/>
-            <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType"/>
+            <xs:attribute name="for" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>The parent's attribute to assign the fragment's output to. When omitted, the fragment is added as a child to the parent.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="name" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Name of the fragment resource to render. Supports folder paths (<code>auth/login</code>) and query parameters (<code>settings?tab=profile</code>). Required.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="visible" type="boolAttributeType">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>When <code>false</code>, the fragment is not inflated at all (skips loading and rendering). Defaults to <code>true</code>.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Controls how <code>Dependencies</code> are passed to the fragment. Defaults to <code>copy</code> when params or query parameters are present, otherwise <code>inherit</code>.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
             <xs:anyAttribute processContents="lax"/>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="if">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Conditionally renders its children when the <code>test</code> expression evaluates to <code>true</code>. If a direct child <code>&lt;else&gt;</code> tag is present, its children are rendered when <code>test</code> is <code>false</code>.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/tags/if_else/">docs.xwidget.dev/references/tags/if_else</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:sequence>
-                <xs:any namespace="##targetNamespace" minOccurs="1" maxOccurs="unbounded"/>
-            </xs:sequence>
-            <xs:attribute name="test" type="xs:string" use="required"/>
+            <xs:choice minOccurs="1" maxOccurs="unbounded">
+                <xs:group ref="allComponents"/>
+                <xs:element ref="else"/>
+                <xs:element ref="param"/>
+            </xs:choice>
+            <xs:attribute name="test" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>EL expression that must evaluate to a <code>bool</code>. Required.</p><br/>
+<p>Other types &mdash; including non-zero numbers or non-empty strings that might be "truthy" in other languages &mdash; will throw an exception.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="else">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Renders its children when the containing <code>&lt;if&gt;</code> test evaluates to <code>false</code>. Must be a direct child of an <code>&lt;if&gt;</code> tag; otherwise it is silently ignored.</p><br/>
+<p>The <code>&lt;else&gt;</code> tag has no attributes.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/tags/if_else/">docs.xwidget.dev/references/tags/if_else</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:sequence>
-                <xs:any namespace="##targetNamespace" minOccurs="1" maxOccurs="unbounded"/>
-            </xs:sequence>
+            <xs:choice minOccurs="1" maxOccurs="unbounded">
+                <xs:group ref="allComponents"/>
+                <xs:element ref="param"/>
+            </xs:choice>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="var">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Sets a dependency value. The value is stored in the current <code>Dependencies</code> instance using <code>name</code> as the key.</p><br/>
+<p>When a parent element contains <code>&lt;var&gt;</code> children and no explicit <code>dependenciesScope</code> is set, XWidget automatically uses <code>copy</code> scoping to prevent variables from leaking into the parent's dependencies.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/tags/var/">docs.xwidget.dev/references/tags/var</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="value" type="xs:string" use="required"/>
+            <xs:attribute name="name" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>The dependency key to store the value under. Required.</p><br/>
+<p>Use <code>...</code> as the name to apply the spread operator: the value (which must be a <code>Map&lt;String, dynamic&gt;</code>) is merged into the current dependencies as individual keys.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="value" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>The value to store. Supports EL expressions, literals, and child widgets. Can be <code>null</code>. Required.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
@@ -460,17 +703,38 @@
 
     <xs:element name="Controller">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Creates a stateful widget from a registered <code>Controller</code> class that manages business logic and state. The controller is instantiated, initialized asynchronously via its <code>init()</code> method, and exposes data to children via <code>bindDependencies()</code>.</p><br/>
+<p>Use <code>&lt;Controller&gt;</code> when your UI needs view-model logic beyond simple data loading &mdash; coordinating multiple async sources, mutating state in response to events, or exposing methods callable from EL. For simple async data loading without business logic, use <code>&lt;DynamicBuilder&gt;</code> instead.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/components/controller/">docs.xwidget.dev/references/components/controller</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="objectType">
-                    <xs:attribute name="key"/>
-                    <xs:attribute name="name"/>
-                    <xs:attribute name="errorWidget"/>
-                    <xs:attribute name="progressWidget"/>
-                    <xs:attribute name="options"/>
+                    <xs:attribute name="key">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>A Flutter <code>Key</code> for controlling widget identity across rebuilds. Use a unique key when widgets may be reordered, or to force Flutter to treat a widget as a new instance.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="name">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>The name under which the <code>Controller</code> class is registered. Required.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="errorWidget">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Widget displayed if controller initialization fails. Defaults to Flutter's <code>ErrorWidget</code>.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="progressWidget">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Widget displayed during controller initialization. Defaults to <code>SizedBox.shrink()</code>.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="options">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Optional <code>Map</code> passed to the controller's <code>options</code> property. Useful for parameterizing a generic controller with instance-specific configuration.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -478,19 +742,50 @@
 
     <xs:element name="DynamicBuilder">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Creates a stateful widget that handles asynchronous data loading and rebuilds. Works with <code>Future</code> (one-time async load), <code>Stream</code> (continuous updates), or static values. The builder is invoked once data is available, and re-invoked whenever a stream emits.</p><br/>
+<p>For business logic beyond simple data loading, use <code>&lt;Controller&gt;</code> instead.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/components/dynamic_builder/">docs.xwidget.dev/references/components/dynamic_builder</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="objectType">
-                    <xs:attribute name="key"/>
-                    <xs:attribute name="builder"/>
-                    <xs:attribute name="errorWidget"/>
-                    <xs:attribute name="progressWidget"/>
-                    <xs:attribute name="initializer"/>
-                    <xs:attribute name="initValue"/>
-                    <xs:attribute name="disposeOfDependencies" type="boolAttributeType"/>
+                    <xs:attribute name="key">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>A Flutter <code>Key</code> for controlling widget identity across rebuilds.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="builder">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Function that builds the widget tree with the loaded data. Signature: <code>(BuildContext, Dependencies, T data) =&gt; Widget</code>. Required.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="errorWidget">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Widget displayed if data loading fails. Defaults to Flutter's <code>ErrorWidget</code>.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="progressWidget">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Widget displayed while waiting for the initial value. Defaults to <code>SizedBox.shrink()</code>.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="initializer">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Function that returns the initial value. Signature: <code>(BuildContext, Dependencies) =&gt; dynamic</code>. Use this when the value needs to be computed lazily with access to context.</p><br/>
+<p><strong>Mutually exclusive with <code>initValue</code></strong> &mdash; providing both throws an exception.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="initValue">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Initial value to use. Can be a <code>Future</code>, <code>Stream</code>, object, or primitive.</p><br/>
+<p><strong>Mutually exclusive with <code>initializer</code></strong> &mdash; providing both throws an exception.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="disposeOfDependencies" type="boolAttributeType">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>When <code>true</code>, the <code>Dependencies</code> instance is disposed when this widget is removed from the tree. Defaults to <code>false</code>.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -498,15 +793,28 @@
 
     <xs:element name="EventListener">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Creates a stateful widget that listens for application-wide events and rebuilds when the event fires. Implements a publish-subscribe pattern for decoupled component communication.</p><br/>
+<p>Listeners are automatically registered on initialization and unregistered on dispose.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/components/event_listener/">docs.xwidget.dev/references/components/event_listener</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="objectType">
-                    <xs:attribute name="key"/>
-                    <xs:attribute name="event"/>
-                    <xs:attribute name="onEvent"/>
+                    <xs:attribute name="key">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>A Flutter <code>Key</code> for controlling widget identity across rebuilds.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="event">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>The event enum value to listen for. Must be a registered event. Required.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="onEvent">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Optional callback invoked when the event fires, before the widget rebuilds. Signature: <code>(Enum event, dynamic payload) =&gt; void</code>.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -514,16 +822,20 @@
 
     <xs:element name="List">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Creates a Dart <code>List</code> from its child elements. Each child becomes an item in the list. Use <code>&lt;Item&gt;</code> children for values from EL expressions, or any other widget/component to add it as a list element.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/components/list/">docs.xwidget.dev/references/components/list</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:complexContent>
+            <xs:complexContent mixed="true">
                 <xs:extension base="objectType">
                     <xs:sequence>
-                        <xs:element name="Item" form="qualified" type="listItemType" minOccurs="0" maxOccurs="unbounded"/>
+                        <xs:element ref="Item" minOccurs="0" maxOccurs="unbounded"/>
                     </xs:sequence>
-                    <xs:attribute name="innerLists" type="ListOperationAttributeType"/>
+                    <xs:attribute name="innerLists" type="ListOperationAttributeType">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Set to <code>"spread"</code> to flatten nested lists one level &mdash; child lists are unpacked into the parent list. Useful for combining multiple sources into a single flat list.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -531,31 +843,60 @@
 
     <xs:element name="Map">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Creates a Dart <code>Map</code> from its child elements. Use <code>&lt;Entry&gt;</code> or <code>&lt;param&gt;</code> children to define key-value pairs. Maps are useful for organizing related data and passing structured parameters to widgets and fragments.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/components/map/">docs.xwidget.dev/references/components/map</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="Entry" form="qualified" type="mapEntryType" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="Entry" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
-            <xs:attribute name="for" type="xs:string"/>
-            <xs:attribute name="visible" type="boolAttributeType"/>
+            <xs:attribute name="for" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>The name of the parent's attribute to assign this map to. When omitted, the map is added to its parent's children collection instead.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="visible" type="boolAttributeType">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>When <code>false</code>, the map is not built. Defaults to <code>true</code>.</p>]]></xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="MediaQuery">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Exposes Flutter's <code>MediaQuery</code> data &mdash; screen size, orientation, padding, accessibility settings &mdash; to child widgets via dependencies. Essential for building responsive layouts that adapt to different screen sizes and device capabilities.</p><br/>
+<p>Properties are exposed as nested dependency keys under <code>varName</code> (default <code>"mediaQuery"</code>): <code>.size.width</code>, <code>.size.layout</code> (resolved to <code>"small"</code>, <code>"medium"</code>, or <code>"large"</code>), <code>.orientation</code>, <code>.viewInsets.bottom</code> (keyboard height), <code>.viewPadding.top</code> (status bar / notch), and more.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/components/media_query/">docs.xwidget.dev/references/components/media_query</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="objectType">
-                    <xs:attribute name="key"/>
-                    <xs:attribute name="varName" type="xs:string"/>
-                    <xs:attribute name="smallMaxWidth" type="integerAttributeType"/>
-                    <xs:attribute name="mediumMaxWidth" type="integerAttributeType"/>
-                    <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType"/>
+                    <xs:attribute name="key">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>A Flutter <code>Key</code> for controlling widget identity across rebuilds.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="varName" type="xs:string">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>The dependency key prefix under which media query properties are exposed. Defaults to <code>"mediaQuery"</code>.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="smallMaxWidth" type="integerAttributeType">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Maximum width (in logical pixels) for the <code>"small"</code> layout class. Screens at or below this width resolve <code>${varName}.size.layout</code> to <code>"small"</code>. Defaults to <code>640</code>.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="mediumMaxWidth" type="integerAttributeType">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Maximum width (in logical pixels) for the <code>"medium"</code> layout class. Screens above <code>smallMaxWidth</code> and at or below this width resolve to <code>"medium"</code>. Larger screens resolve to <code>"large"</code>. Defaults to <code>1024</code>.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Controls how <code>Dependencies</code> are passed to children. Defaults to <code>copy</code> so media query keys don't leak to the parent.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -563,18 +904,44 @@
 
     <xs:element name="ValueListener">
         <xs:annotation>
-            <xs:documentation xml:lang="en">
-            </xs:documentation>
+            <xs:documentation xml:lang="en"><![CDATA[<p>Listens for changes to a named dependency value and rebuilds its children when the value changes. The primary mechanism for reactive UI updates in XWidget &mdash; when a value is updated via <code>Dependencies.setValue()</code>, any listener watching that key automatically rebuilds.</p><br/>
+<p>Multiple listeners can watch the same dependency and all rebuild on change.</p><br/>
+<p>Full reference: <a href="https://docs.xwidget.dev/references/components/value_listener/">docs.xwidget.dev/references/components/value_listener</a></p>]]></xs:documentation>
         </xs:annotation>
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="objectType">
-                    <xs:attribute name="key"/>
-                    <xs:attribute name="varName"/>
-                    <xs:attribute name="varDisposal" type="VariableDisposalAttributeType"/>
-                    <xs:attribute name="initialValue"/>
-                    <xs:attribute name="defaultValue"/>
-                    <xs:attribute name="onChange"/>
+                    <xs:attribute name="key">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>A Flutter <code>Key</code> for controlling widget identity across rebuilds.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="varName">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>The dependency key to watch for changes. Required.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="varDisposal" type="VariableDisposalAttributeType">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Controls how the underlying <code>ValueNotifier</code> is disposed when this listener is removed. Values: <code>none</code> (default &mdash; keep alive), <code>byOwner</code> (dispose if this listener created the notifier), <code>byLastListener</code> (dispose if no other listeners remain).</p><br/>
+<p>When the notifier is disposed, the dependency value is also removed from the <code>Dependencies</code> instance.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="initialValue">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Value to set in dependencies if the watched key doesn't exist yet. Used once at listener initialization.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="defaultValue">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Fallback value used if the watched dependency resolves to <code>null</code>. Applied on every read, not just initialization.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="onChange">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Optional callback invoked when the watched value changes, before the widget rebuilds.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -583,5 +950,9 @@
     <!-- generated inflater elements -->
 
     <!--@@inflaters@@-->
+
+    <!-- generated group: <xs:choice> referencing every inflater above -->
+
+    <!--@@generated_inflaters_group@@-->
 
 </xs:schema>

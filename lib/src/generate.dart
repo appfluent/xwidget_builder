@@ -42,6 +42,14 @@ class GenerateCommand extends FlexCommand {
       help: "Allow deprecated constructors and constructor arguments.",
       negatable: false,
     );
+    argParser.addOption(
+      "schema-docs",
+      abbr: "s",
+      help:
+          "Schema documentation output format. Overrides schema.documentationFormat "
+          "in xwidget_config.yaml. Use 'html' for proper formatting in IntelliJ-based IDEs.",
+      allowed: ["cdata", "html"],
+    );
     argParser.addMultiOption(
       "only",
       help: "Comma separated list of components to generate. Defaults to all components.",
@@ -56,6 +64,7 @@ class GenerateCommand extends FlexCommand {
   Future<void> runWith(ArgResults argResults) async {
     final configPath = argResults['config'] as String;
     final allowDeprecated = argResults['allow-deprecated'] == true;
+    final schemaFormat = argResults["schema-docs"] as String?;
     final only = argResults['only'] as List<String>;
     CliLog.info("Generating components...");
 
@@ -64,8 +73,11 @@ class GenerateCommand extends FlexCommand {
     await config.loadConfig(defaultConfigPath);
     await config.loadConfig(configPath);
 
-    // build components
+    if (schemaFormat != null) {
+      config.schemaConfig.documentationFormat = schemaFormat;
+    }
 
+    // build components
     final buildComponents = <String>{}..addAll(only);
     for (final component in buildComponents) {
       switch (component) {

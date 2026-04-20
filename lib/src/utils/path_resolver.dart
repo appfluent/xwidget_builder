@@ -44,7 +44,8 @@ class PathResolver {
       final packageUri = Uri.parse(uriPath);
       final basePath = await findPackagePath(packageUri.pathSegments[0]);
       final relativePath = packageUri.pathSegments.skip(1).join('/');
-      return Uri.parse("file://$basePath/$relativePath");
+      final absoluteBase = Directory(basePath).absolute.path;
+      return Uri.file('$absoluteBase/$relativePath');
     }
     final root = packageRoot;
     return root.resolve(path);

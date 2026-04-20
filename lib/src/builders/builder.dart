@@ -166,6 +166,11 @@ class BuilderConfig {
         "schema.template",
         schemaConfig.template,
       );
+      schemaConfig.documentationFormat = ConfigLoader.loadToString(
+        doc,
+        "schema.documentationFormat",
+        schemaConfig.documentationFormat,
+      );
       ConfigLoader.loadToMap(doc, "schema.types", schemaConfig.types);
       ConfigLoader.loadToSet(doc, "schema.attribute_exclusions", schemaConfig.attributeExclusions);
 
@@ -202,6 +207,7 @@ class BuilderConfig {
 class SchemaConfig with ConfigMixin {
   String target = "";
   String template = "";
+  String documentationFormat = "";
   Map<String, String> types = {};
   Set<String> attributeExclusions = {};
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Column xmlns="http://www.appfluent.us/xwidget">
+    <Controller name="MyController"/>
+    <DynamicBuilder builder="someBuilder"/>
+    <EventListener event="tap" onEvent="handleTap"/>
+    <List>
+        <Item value="apple"/>
+        <Item value="banana"/>
+    </List>
+    <Map>
+        <Entry key="name" value="Alice"/>
+        <Entry key="age" value="30"/>
+    </Map>
+    <MediaQuery varName="screenSize"/>
+    <ValueListener varName="counter" onChange="handleChange"/>
+</Column>

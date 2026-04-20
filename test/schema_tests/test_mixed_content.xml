@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Column xmlns="http://www.appfluent.us/xwidget">
+    <Text>Plain text content</Text>
+    <Text>Another text widget</Text>
+</Column>

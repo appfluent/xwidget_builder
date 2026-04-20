@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:analyzer/dart/element/element.dart';
@@ -23,6 +24,11 @@ class InflaterBuilder extends SpecBuilder {
   final InflaterConfig inflaterConfig;
   final SchemaConfig schemaConfig;
   final Map<String, SchemaType> schemaTypes = {};
+
+  // Collected during build(); used to emit the `generatedInflaters` group
+  // referenced by the schema template's `allComponents` group. SplayTreeSet
+  // gives deterministic alphabetical ordering across regenerations.
+  final Set<String> inflaterKeys = SplayTreeSet<String>();
 
   InflaterBuilder(super.config)
     : inflaterConfig = config.inflaterConfig,
@@ -449,10 +455,24 @@ class InflaterBuilder extends SpecBuilder {
         }
       } else if (line.contains("<!--@@inflaters@@-->")) {
         code.write(elements);
+      } else if (line.contains("<!--@@generated_inflaters_group@@-->")) {
+        code.write(_buildGeneratedInflatersGroup());
       } else {
         code.write("$line\n");
       }
     }
+    return code.toString();
+  }
+
+  String _buildGeneratedInflatersGroup() {
+    final code = StringBuffer();
+    code.write('    <xs:group name="generatedInflaters">\n');
+    code.write('        <xs:choice>\n');
+    for (final key in inflaterKeys) {
+      code.write('            <xs:element ref="$key"/>\n');
+    }
+    code.write('        </xs:choice>\n');
+    code.write('    </xs:group>\n');
     return code.toString();
   }
 
@@ -468,6 +488,7 @@ class InflaterBuilder extends SpecBuilder {
     final inflaterKey =
         annotations[inflaterDefAnnotation]?[inflaterTypeParam] ??
         _buildInflaterName(context, constructorName, ".");
+    inflaterKeys.add(inflaterKey);
 
     for (final param in constructor.parameters) {
       if ((!param.hasDeprecated || config.allowDeprecated) &&
@@ -499,11 +520,19 @@ class InflaterBuilder extends SpecBuilder {
     final padding = "".padLeft(indent);
     final docs = documentationToMarkdown(documentation);
     if (docs != null && docs.isNotEmpty) {
-      code.write('$padding<xs:annotation>\n');
-      code.write('$padding    <xs:documentation xml:lang="en">\n');
-      code.writeln(docs);
-      code.write('$padding    </xs:documentation>\n');
-      code.write('$padding</xs:annotation>\n');
+      code.writeln('$padding<xs:annotation>');
+      switch (schemaConfig.documentationFormat) {
+        case 'html':
+          code.writeln('$padding    <xs:documentation xml:lang="en">');
+          code.write(docs);
+          code.writeln('$padding    </xs:documentation>');
+          break;
+        default:
+          code.writeln('$padding    <xs:documentation xml:lang="en"><![CDATA[');
+          code.write(docs);
+          code.writeln('$padding    ]]></xs:documentation>');
+      }
+      code.writeln('$padding</xs:annotation>');
     }
     return code.toString();
   }

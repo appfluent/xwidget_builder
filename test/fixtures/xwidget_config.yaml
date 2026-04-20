@@ -1,0 +1,17 @@
+# XWidget Config
+
+icons:
+  target: "src/generated/src/icons_test.g.dart"
+  sources: [
+    "src/icons_spec.dart"
+  ]
+
+inflaters:
+  target: "src/generated/src/inflaters_test.g.dart"
+  imports: [ ]
+  sources: [
+    "src/inflater_spec.dart"
+  ]
+
+schema:
+  target: "xwidget_schema.g.xsd"

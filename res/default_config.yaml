@@ -75,6 +75,7 @@ inflaters:
 schema:
   target: "xwidget_schema.g.xsd"
   template: "xwidget_builder|res/schema_template.xsd"
+  documentationFormat: "cdata"
 
   types:
     "bool": "boolAttributeType"

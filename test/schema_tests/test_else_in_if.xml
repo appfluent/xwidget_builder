@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Column xmlns="http://www.appfluent.us/xwidget">
+    <if test="${cond}">
+        <Text>True branch</Text>
+        <param name="result" value="yes"/>
+        <else>
+            <Text>False branch</Text>
+            <param name="result" value="no"/>
+        </else>
+    </if>
+</Column>

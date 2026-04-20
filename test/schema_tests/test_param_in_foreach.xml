@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Column xmlns="http://www.appfluent.us/xwidget">
+    <forEach var="item" items="${items}">
+        <Text>Showing item</Text>
+        <param name="current" value="${item}"/>
+    </forEach>
+</Column>

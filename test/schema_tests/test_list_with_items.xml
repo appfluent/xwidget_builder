@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Column xmlns="http://www.appfluent.us/xwidget">
+    <List>
+        <Item value="one"/>
+        <Item value="two"/>
+        <Item value="three"/>
+    </List>
+</Column>

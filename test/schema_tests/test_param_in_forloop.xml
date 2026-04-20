@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Column xmlns="http://www.appfluent.us/xwidget">
+    <forLoop var="i" begin="0" end="10">
+        <Text>Iteration</Text>
+        <param name="index" value="${i}"/>
+    </forLoop>
+</Column>

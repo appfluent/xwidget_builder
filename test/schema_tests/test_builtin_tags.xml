@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Column xmlns="http://www.appfluent.us/xwidget">
+    <var name="count" value="5"/>
+    <debug message="entering loop"/>
+    <forEach var="i" items="${list}">
+        <Text>Item ${i}</Text>
+    </forEach>
+    <forLoop var="i" begin="0" end="10">
+        <Text>Loop iteration</Text>
+    </forLoop>
+    <if test="${ready}">
+        <Text>Ready</Text>
+    </if>
+    <fragment name="header"/>
+    <builder for="someBuilder">
+        <Text>Built dynamically</Text>
+    </builder>
+    <callback for="onTap" action="handleTap"/>
+</Column>

@@ -29,3 +29,8 @@ migrate_working_dir/
 build/
 /test/generated/
 /analyze.txt
+/test/fixtures/import_cache.json
+/test/fixtures/pubspec.lock
+/test/fixtures/schema_test.g.xsd
+/test/fixtures/xwidget_schema.g.xsd
+/test/fixtures/src/generated/

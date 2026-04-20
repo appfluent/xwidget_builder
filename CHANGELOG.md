@@ -1,3 +1,12 @@
+## 0.4.3
+
+- Reworked schema template for precise child element validation. Context-restricted elements (`param`, `Entry`, `Item`, `else`) are now validated only where they're actually allowed.
+- Added hover documentation to all built-in elements and their attributes in the generated schema. Includes links to full reference docs.
+- Added `schema.documentationFormat` option in `xwidget_config.yaml` (`cdata` or `html`). Use `html` for better hover rendering in IntelliJ-based IDEs.
+- Added `--schema-docs` CLI flag to override `schema.documentationFormat` per invocation.
+- Fixed path resolution for `xwidget_builder` when added as a relative path dependency (`path: ../../` in `pubspec.yaml`).
+- Fixed schema compatibility with strict XSD validators (e.g. xmllint).
+
 ## 0.4.2
 
 - Fixed inflation of nested parameterized collections (`List<List<Widget>>`,
