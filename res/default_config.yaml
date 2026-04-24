@@ -1,9 +1,12 @@
 # XWidget default config
 
-# paths relative to project root
-resources:
-  fragments: "resources/fragments"
-  values: "resources/values"
+# runtime resource paths (relative to project root)
+fragmentsPath: "resources/fragments"
+valuesPath: "resources/values"
+
+# registry options
+registry:
+  target: "lib/xwidget/generated/registry.g.dart"
 
 # inflater options
 inflaters:

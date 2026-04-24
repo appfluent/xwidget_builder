@@ -47,11 +47,11 @@ class ProjectConfig {
   }
 
   Future<String?> getFragmentsPath() async {
-    return ConfigLoader.loadToStringOrNull(await _getConfig(), 'resources.fragments');
+    return ConfigLoader.loadToStringOrNull(await _getConfig(), 'fragmentsPath');
   }
 
   Future<String?> getValuesPath() async {
-    return ConfigLoader.loadToStringOrNull(await _getConfig(), 'resources.values');
+    return ConfigLoader.loadToStringOrNull(await _getConfig(), 'valuesPath');
   }
 
   Future<void> deleteCloudConfig() async {

@@ -4,6 +4,7 @@ import 'builders/builder.dart';
 import 'builders/controllers.dart';
 import 'builders/icons.dart';
 import 'builders/inflaters.dart';
+import 'builders/registry.dart';
 import 'utils/cli_log.dart';
 import 'utils/commands.dart';
 
@@ -92,6 +93,11 @@ class GenerateCommand extends FlexCommand {
           break;
       }
     }
+
+    // always build the registry last, regardless of --only, so it reflects
+    // the current state of the filesystem
+    await RegistryBuilder(config).build();
+
     CliLog.info("Done!\n");
   }
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:interact2/interact2.dart';
 import 'package:pub_semver/pub_semver.dart';
 
+import '../constants.dart';
 import '../utils/ansi.dart';
 import '../utils/project_config.dart';
 import '../utils/prompts.dart';
@@ -98,11 +99,13 @@ class DeployCommand extends BaseCommand {
       return;
     }
 
+    // prompt for fragments path if not configured
     String? fragmentsPath = await projectConfig.getFragmentsPath();
-    fragmentsPath ??= inputFragmentsPath("resources/fragments");
+    fragmentsPath ??= inputFragmentsPath(defaultFragmentsPath);
 
+    // prompt for values path if not configured
     String? valuesPath = await projectConfig.getValuesPath();
-    valuesPath ??= inputValuesPath("resources/values");
+    valuesPath ??= inputValuesPath(defaultValuesPath);
 
     final ready = confirmContinue("Deploy to cloud?");
     if (!ready) {

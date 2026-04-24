@@ -6,3 +6,6 @@ const logo = r'''
 /_/|_| |__/|__/_/\__,_/\__, /\___/\__/  
                       /____/          
 ''';
+
+const defaultFragmentsPath = "resources/fragments";
+const defaultValuesPath = "resources/values";

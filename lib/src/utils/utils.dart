@@ -134,6 +134,13 @@ Future<String> getBuilderVersion() async {
   return ConfigLoader.loadToString(pubspec, "packages.xwidget_builder.version", "<unknown>");
 }
 
+/// Retrieves the resolved version of xwidget from the project's pubspec.lock.
+/// Returns the version string or `<unknown>` if not found.
+Future<String> getXWidgetVersion() async {
+  final pubspec = await ConfigLoader.loadYamlDoc("pubspec.lock");
+  return ConfigLoader.loadToString(pubspec, "packages.xwidget.version", "<unknown>");
+}
+
 /// Resolves Flutter project dependencies by running `flutter pub get`.
 /// Returns true if successful, false otherwise.
 /// Logs success or error messages via CliLog.

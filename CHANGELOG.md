@@ -1,3 +1,11 @@
+## 0.5.0
+
+- **BREAKING:** Config schema changes in `xwidget_config.yaml`. The `resources:` group has been removed; use top-level `fragmentsPath` and `valuesPath` keys instead. See the [upgrade guide](https://docs.xwidget.dev/builder/upgrade-guide/) for migration steps.
+- Added a registry builder that generates a single `registry.g.dart` exporting a `registerXWidgetComponents()` function. Users call this one function from `main.dart` instead of calling `registerXWidgetIcons()`, `registerXWidgetInflaters()`, and `registerXWidgetControllers()` manually. Requires `xwidget` 0.5.0 or newer; on older `xwidget` the registry is skipped and existing manual-registration patterns continue to work.
+- Added `registry:` section in `xwidget_config.yaml` with a `target:` key controlling the output path (defaults to `lib/xwidget/generated/registry.g.dart`).
+- Registry generation runs after every `generate` invocation regardless of the `--only` flag, so the registry stays in sync with whatever other generated files exist.
+- Orphaned generated files (target exists but source globs no longer match) are detected and excluded from the registry with a warning.
+
 ## 0.4.3
 
 - Reworked schema template for precise child element validation. Context-restricted elements (`param`, `Entry`, `Item`, `else`) are now validated only where they're actually allowed.

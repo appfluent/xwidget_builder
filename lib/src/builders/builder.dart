@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:markdown/markdown.dart';
 
+import '../constants.dart';
 import '../utils/cli_log.dart';
 import '../utils/config_loader.dart';
 import '../utils/extensions.dart';
@@ -137,6 +138,11 @@ class BuilderConfig {
   final schemaConfig = SchemaConfig();
   final inflaterConfig = InflaterConfig();
   final controllerConfig = ControllerConfig();
+  final registryConfig = RegistryConfig();
+
+  // runtime resource paths
+  String fragmentsPath = defaultFragmentsPath;
+  String valuesPath = defaultValuesPath;
 
   BuilderConfig({this.allowDeprecated = false});
 
@@ -144,6 +150,17 @@ class BuilderConfig {
     final doc = await ConfigLoader.loadYamlDoc(path);
     if (doc != null) {
       CliLog.success("Found config at '$path'");
+
+      // runtime resource paths
+      fragmentsPath = ConfigLoader.loadToString(doc, "fragmentsPath", fragmentsPath);
+      valuesPath = ConfigLoader.loadToString(doc, "valuesPath", valuesPath);
+
+      // registry config
+      registryConfig.target = ConfigLoader.loadToString(
+        doc,
+        "registry.target",
+        registryConfig.target,
+      );
 
       // icon config
       iconConfig.target = ConfigLoader.loadToString(doc, "icons.target", iconConfig.target);
@@ -321,6 +338,19 @@ class IconConfig {
     var valid = true;
     if (isEmpty(target) && sources.isNotEmpty) {
       CliLog.error("Config missing 'icons' output target.");
+      valid = false;
+    }
+    return valid;
+  }
+}
+
+class RegistryConfig {
+  String target = "";
+
+  bool isValid() {
+    var valid = true;
+    if (isEmpty(target)) {
+      CliLog.error("Config missing 'registry' output target.");
       valid = false;
     }
     return valid;

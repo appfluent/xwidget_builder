@@ -2,6 +2,7 @@ import 'package:args/args.dart';
 import 'package:xwidget_builder/src/utils/prompts.dart';
 import 'package:yaml/yaml.dart';
 
+import 'constants.dart';
 import 'generate.dart';
 import 'utils/cli_log.dart';
 import 'utils/commands.dart';
@@ -16,21 +17,21 @@ Future<void> main(List<String> args) async {
 }
 
 class InitializeCommand extends FlexCommand {
-  static const initDirs = ["lib/xwidget/controllers", "resources/fragments", "resources/values"];
+  static const initDirs = ["lib/xwidget/controllers", defaultFragmentsPath, defaultValuesPath];
 
   static const initFiles = {
     "$exampleDir/xwidget_config.yaml": "xwidget_config.yaml",
     "$exampleDir/lib/xwidget/icon_spec.dart": "lib/xwidget/icon_spec.dart",
     "$exampleDir/lib/xwidget/inflater_spec.dart": "lib/xwidget/inflater_spec.dart",
-    "$exampleDir/resources/values/colors.xml": "resources/values/colors.xml",
-    "$exampleDir/resources/values/strings.xml": "resources/values/strings.xml",
+    "$exampleDir/$defaultValuesPath/colors.xml": "$defaultValuesPath/colors.xml",
+    "$exampleDir/$defaultValuesPath/strings.xml": "$defaultValuesPath/strings.xml",
   };
 
   static const newAppFiles = {
     "$exampleDir/lib/xwidget/controllers/app_controller.dart":
         "lib/xwidget/controllers/app_controller.dart",
-    "$exampleDir/resources/fragments/my_app.xml": "resources/fragments/my_app.xml",
-    "$exampleDir/resources/fragments/count.xml": "resources/fragments/count.xml",
+    "$exampleDir/$defaultFragmentsPath/my_app.xml": "$defaultFragmentsPath/my_app.xml",
+    "$exampleDir/$defaultFragmentsPath/count.xml": "$defaultFragmentsPath/count.xml",
   };
 
   static const builderPackage = "xwidget_builder";
@@ -98,8 +99,8 @@ class InitializeCommand extends FlexCommand {
       await addDependencyIfNeeded(pubspec, "xwidget");
       await addDevDependencyIfNeeded(pubspec, "xwidget_builder");
 
-      addAssetDirIfNeeded(pubspec, "resources/fragments/");
-      addAssetDirIfNeeded(pubspec, "resources/values/");
+      addAssetDirIfNeeded(pubspec, "$defaultFragmentsPath/");
+      addAssetDirIfNeeded(pubspec, "$defaultValuesPath/");
 
       Files.createFile("pubspec.yaml", pubspec.toYamlString());
       CliLog.success("Updated pubspec.yaml");
