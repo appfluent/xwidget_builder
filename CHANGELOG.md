@@ -1,3 +1,7 @@
+## 0.5.1
+
+- Controller code generation now skips abstract classes.
+
 ## 0.5.0
 
 - **BREAKING:** Config schema changes in `xwidget_config.yaml`. The `resources:` group has been removed; use top-level `fragmentsPath` and `valuesPath` keys instead. See the [upgrade guide](https://docs.xwidget.dev/builder/upgrade-guide/) for migration steps.
