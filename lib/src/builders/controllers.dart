@@ -80,7 +80,8 @@ class ControllerBuilder extends SpecBuilder {
   }
 
   String _buildRegisterControllerCall(ClassElement element) {
-    return "  XWidget.registerControllerFactory(() => ${element.name}());\n";
+    final params = "'${element.name}', () => ${element.name}()";
+    return "  XWidget.registerControllerFactoryForName($params);\n";
   }
 
   bool _isOkToBuild() {

@@ -1,3 +1,10 @@
+## 0.5.2
+
+- Controller code generation now registers factories by explicit class name via
+  `registerControllerFactoryForName()`.
+- Fixes generated controller registration for dart2js/minified web builds.
+- Removed `import_cache.json` output.
+
 ## 0.5.1
 
 - Controller code generation now skips abstract classes.

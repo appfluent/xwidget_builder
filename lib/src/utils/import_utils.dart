@@ -1,13 +1,10 @@
 import 'dart:collection';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:path/path.dart' as path;
 
 import 'cli_log.dart';
-import 'path_resolver.dart';
 
 class ImportBuilder {
   final _resolver = ImportResolver();
@@ -26,7 +23,6 @@ class ImportBuilder {
       }
       await _resolver.cacheLibrary(library);
     }
-    _resolver._logCache("import_cache.json");
   }
 
   void addImportsForTypes(Iterable<DartType> types) {
@@ -217,23 +213,5 @@ class ImportResolver {
     }
 
     return possibleImports.first;
-  }
-
-  void _logCache(String filePath) async {
-    final output = JsonEncoder.withIndent('  ').convert(_forJson(_locationCache));
-    final outputTargetUri = await PathResolver.relativeToAbsolute(filePath);
-    final outputTargetFile = await File(outputTargetUri.path).create(recursive: true);
-    await outputTargetFile.writeAsString(output.toString());
-  }
-
-  dynamic _forJson(dynamic value) {
-    if (value is Set) {
-      return value.map(_forJson).toList();
-    } else if (value is Map) {
-      return value.map((k, v) => MapEntry(k, _forJson(v)));
-    } else if (value is List) {
-      return value.map(_forJson).toList();
-    }
-    return value;
   }
 }
