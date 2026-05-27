@@ -91,9 +91,7 @@ schema:
     "TextDecoration": "TextDecorationAttributeType"
     "TextInputType": "TextInputTypeAttributeType"
 
-  attribute_exclusions: [
-    "*:child",
-  ]
+  attribute_exclusions: [ ]
 
 # controller options
 controllers:

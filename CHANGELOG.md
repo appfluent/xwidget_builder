@@ -1,3 +1,8 @@
+## 0.5.3
+
+- Added `keepAlive` to the built-in `Controller` schema element so XML schema validation and IDE completion match the runtime controller attribute.
+- Updated the default schema config to stop excluding `*:child` attributes globally.
+
 ## 0.5.2
 
 - Controller code generation now registers factories by explicit class name via

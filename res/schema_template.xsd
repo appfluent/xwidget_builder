@@ -730,6 +730,11 @@
                             <xs:documentation xml:lang="en"><![CDATA[<p>Widget displayed during controller initialization. Defaults to <code>SizedBox.shrink()</code>.</p>]]></xs:documentation>
                         </xs:annotation>
                     </xs:attribute>
+                    <xs:attribute name="keepAlive">
+                        <xs:annotation>
+                            <xs:documentation xml:lang="en"><![CDATA[<p>Whether the controller should request keep-alive behavior from keep-alive-aware parents such as <code>PageView</code>. Defaults to <code>false</code>.</p>]]></xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
                     <xs:attribute name="options">
                         <xs:annotation>
                             <xs:documentation xml:lang="en"><![CDATA[<p>Optional <code>Map</code> passed to the controller's <code>options</code> property. Useful for parameterizing a generic controller with instance-specific configuration.</p>]]></xs:documentation>
