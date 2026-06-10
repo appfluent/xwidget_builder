@@ -483,7 +483,8 @@
             </xs:attribute>
             <xs:attribute name="returnVar" type="xs:string">
                 <xs:annotation>
-                    <xs:documentation xml:lang="en"><![CDATA[<p>Dependency key in which to store the action's return value. Useful when the action computes something that subsequent code needs.</p>]]></xs:documentation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Dependency key in which to store the action's return value.</p><br/>
+<p>The result is always stored in the surrounding <code>Dependencies</code> (independent of <code>dependenciesScope</code>), so other widgets can read it.</p>]]></xs:documentation>
                 </xs:annotation>
             </xs:attribute>
             <xs:attribute name="vars" type="xs:string">
@@ -493,7 +494,7 @@
             </xs:attribute>
             <xs:attribute name="dependenciesScope" type="dependenciesScopeAttributeType">
                 <xs:annotation>
-                    <xs:documentation xml:lang="en"><![CDATA[<p>Controls how <code>Dependencies</code> are scoped during action evaluation. Defaults to <code>inherit</code>, or <code>copy</code> when <code>vars</code> or <code>returnVar</code> are present.</p>]]></xs:documentation>
+                    <xs:documentation xml:lang="en"><![CDATA[<p>Controls how <code>Dependencies</code> are scoped while <code>action</code> is evaluated; it does not affect where <code>returnVar</code> is stored. Defaults to <code>inherit</code>, or <code>copy</code> when <code>vars</code> are present so the handler arguments don't leak into the surrounding scope.</p>]]></xs:documentation>
                 </xs:annotation>
             </xs:attribute>
         </xs:complexType>

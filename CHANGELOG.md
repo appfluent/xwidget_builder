@@ -1,3 +1,10 @@
+## 0.5.4
+
+- Updated the generated schema documentation for `<callback>` to match the corrected runtime
+  behavior: `returnVar` is always stored in the surrounding `Dependencies` (independent of
+  `dependenciesScope`), and `dependenciesScope` controls only how `action` is evaluated, not
+  where `returnVar` is stored.
+
 ## 0.5.3
 
 - Added `keepAlive` to the built-in `Controller` schema element so XML schema validation and IDE completion match the runtime controller attribute.

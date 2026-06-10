@@ -34,3 +34,4 @@ build/
 /test/fixtures/schema_test.g.xsd
 /test/fixtures/xwidget_schema.g.xsd
 /test/fixtures/src/generated/
+/.flutter-plugins-dependencies
