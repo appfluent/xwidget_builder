@@ -38,12 +38,14 @@ class ControllerBuilder extends SpecBuilder {
       for (final path in sourceManifest.paths) {
         final library = libraryElements[path];
         if (library != null) {
-          for (final element in library.topLevelElements) {
-            if (element is ClassElement && !element.isAbstract) {
+          for (final element in library.classes) {
+            if (!element.isAbstract) {
               for (final interfaceType in element.allSupertypes) {
                 if (getInterfaceElementFQN(interfaceType.element) ==
                     "package:xwidget/src/custom/controller.dart::Controller") {
-                  importBuilder.addImport(element.source.uri.toString());
+                  importBuilder.addImport(
+                    element.firstFragment.libraryFragment.source.uri.toString(),
+                  );
                   registrations.write(_buildRegisterControllerCall(element));
                 }
               }
@@ -80,7 +82,7 @@ class ControllerBuilder extends SpecBuilder {
   }
 
   String _buildRegisterControllerCall(ClassElement element) {
-    final params = "'${element.name}', () => ${element.name}()";
+    final params = "'${element.displayName}', () => ${element.displayName}()";
     return "  XWidget.registerControllerFactoryForName($params);\n";
   }
 

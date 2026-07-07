@@ -1,0 +1,11 @@
+# Config for error-path tests: generates from intentionally broken sources
+# into scratch targets so the main golden outputs are untouched.
+
+inflaters:
+  target: "src/generated/broken/inflaters_broken.g.dart"
+  sources: [
+    "src/broken_spec.dart"
+  ]
+
+schema:
+  target: "src/generated/broken/schema_broken.g.xsd"

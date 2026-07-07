@@ -35,13 +35,13 @@ class ProjectRenameCommand extends BaseCommand {
         existence: Existence.mustNotExist,
       );
     } else {
-      final existing = await api.lookupProject(project.workspaceId, newName, strict: false);
+      final existing = await api.lookupProject(project.workspaceId, newName, mustExist: false);
       if (existing != null) {
         throw CloudException("A project named '$newName' already exists.");
       }
     }
 
-    if (!confirmContinue("Rename project to $newName?")) {
+    if (!confirmContinue(prompt: "Rename project to $newName?")) {
       CliLog.info("Rename canceled.\n");
       return;
     }

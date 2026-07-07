@@ -64,7 +64,7 @@ class ProjectRotateKeyCommand extends BaseCommand {
       throw CloudException('Grace period must be between 0 and 90.');
     }
 
-    if (!confirmContinue('Rotate key for project "${project.name}"?')) {
+    if (!confirmContinue(prompt: 'Rotate key for project "${project.name}"?')) {
       CliLog.info('Key rotation canceled.');
       return;
     }

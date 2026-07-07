@@ -1,6 +1,6 @@
 name: xwidget_builder
 description: "Development tool for generating XWidget components to build dynamic Flutter UIs with XML based markup."
-version: 0.5.4
+version: 0.6.0
 repository: https://github.com/appfluent/xwidget_builder
 issue_tracker: https://github.com/appfluent/xwidget_builder/issues
 
@@ -12,13 +12,13 @@ topics:
   - widgets
 
 environment:
-  sdk: '>=3.8.0 <4.0.0'
-  flutter: ">=3.10.0"
+  sdk: '>=3.9.0 <4.0.0'
+  flutter: ">=3.35.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  analyzer: ^7.7.1
+  analyzer: ">=13.0.0 <14.0.0"
   archive: ^4.0.7
   args: ^2.4.2
   crypto: ^3.0.7

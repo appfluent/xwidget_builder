@@ -45,12 +45,12 @@ abstract class SpecBuilder {
     return !type.endsWith("?");
   }
 
-  String? getParameterDocumentation(ClassElement type, ParameterElement param) {
-    var fieldElement = type.getField(param.name);
-    if (fieldElement == null && param.isSuperFormal) {
+  String? getParameterDocumentation(ClassElement type, FormalParameterElement param) {
+    var fieldElement = type.getField(param.displayName);
+    if (fieldElement == null && param is SuperFormalParameterElement) {
       final superTypes = type.allSupertypes;
       for (final superType in superTypes) {
-        fieldElement = superType.element.getField(param.name);
+        fieldElement = superType.element.getField(param.displayName);
         if (fieldElement != null) break;
       }
     }
@@ -58,7 +58,7 @@ abstract class SpecBuilder {
   }
 
   String getInterfaceElementFQN(InterfaceElement element) {
-    return "${element.source.uri.toString()}::${element.name}";
+    return "${element.firstFragment.libraryFragment.source.uri.toString()}::${element.displayName}";
   }
 
   String? documentationToMarkdown(String? docComment) {
@@ -119,7 +119,7 @@ abstract class SpecBuilder {
   ///
   /// Private means that it should not appear in the schema as an attribute and
   /// it should be a 'private' reference in Dependencies (prepend '_' to Dependencies key).
-  bool isPrivateAccessParam(ParameterElement param, bool isCustomWidget) {
+  bool isPrivateAccessParam(FormalParameterElement param, bool isCustomWidget) {
     final paramType = param.type.displayStringWithoutNullability();
     return (paramType == "Dependencies" || paramType == "XmlElement") && isCustomWidget;
   }

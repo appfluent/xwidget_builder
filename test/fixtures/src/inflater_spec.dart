@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'test_classes.dart';
+import 'test_custom_widgets.dart';
 
 // Define constants for all widgets and objects we want to generate inflaters for.
 // Used by the builder to generate inflaters.
@@ -39,4 +40,14 @@ const inflaters = [
   TestTypeParameters<String, TestObject?>,
   TestNamedParams,
   TestPositionalParams,
+
+  // analyzer edge cases: annotations, enums, super formals, deprecations,
+  // private constructors, exclusions, function-typed params
+  TestCustomWidget,
+  TestEnumWidget,
+  TestSuperFormals,
+  TestDeprecations,
+  TestPrivateCtor,
+  TestExclusions,
+  TestFunctionParams,
 ];

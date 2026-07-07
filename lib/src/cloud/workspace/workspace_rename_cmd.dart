@@ -38,7 +38,7 @@ class WorkspaceRenameCommand extends BaseCommand {
       },
     ).interact();
 
-    if (!confirmContinue("Rename workspace to $newName?")) {
+    if (!confirmContinue(prompt: "Rename workspace to $newName?")) {
       CliLog.info("Rename canceled.\n");
       return;
     }

@@ -63,13 +63,13 @@ class ChannelRenameCommand extends BaseCommand {
         existence: Existence.mustNotExist,
       );
     } else {
-      final existing = await api.lookupChannel(project.workspaceId, newName, strict: false);
+      final existing = await api.lookupChannel(project.id, newName, mustExist: false);
       if (existing != null) {
         throw CloudException('A channel named "$newName" already exists.');
       }
     }
 
-    if (!confirmContinue('Rename channel "${channel.name}" to "$newName"?')) {
+    if (!confirmContinue(prompt: 'Rename channel "${channel.name}" to "$newName"?')) {
       CliLog.info('Rename canceled.\n');
       return;
     }

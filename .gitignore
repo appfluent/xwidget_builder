@@ -34,4 +34,5 @@ build/
 /test/fixtures/schema_test.g.xsd
 /test/fixtures/xwidget_schema.g.xsd
 /test/fixtures/src/generated/
+/test/fixtures/golden_baseline/
 /.flutter-plugins-dependencies

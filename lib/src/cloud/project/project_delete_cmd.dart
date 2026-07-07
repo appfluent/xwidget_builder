@@ -33,10 +33,7 @@ class ProjectDeleteCommand extends BaseCommand {
     );
 
     // confirm deletion
-    if (!confirmContinue(
-      'Delete "$projectName" and '
-      'ALL its channels and deployments?',
-    )) {
+    if (!confirmContinue(prompt: 'Delete "$projectName" and ALL its channels and deployments?')) {
       CliLog.info('Deletion canceled.\n');
       return;
     }

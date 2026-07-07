@@ -1,9 +1,9 @@
 import 'package:interact2/interact2.dart';
 
-bool confirmContinue([String prompt = "Continue?"]) {
+bool confirmContinue({String prompt = "Continue?", bool defaultValue = false}) {
   return Confirm(
     prompt: prompt,
-    defaultValue: false, // this is optional
+    defaultValue: defaultValue, // this is optional
     waitForNewLine: true, // optional and will be false by default
   ).interact();
 }

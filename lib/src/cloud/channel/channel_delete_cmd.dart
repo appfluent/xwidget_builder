@@ -39,10 +39,7 @@ class ChannelDeleteCommand extends BaseCommand {
     printTitle(project: project);
 
     // confirm
-    if (!confirmContinue(
-      'Delete channel "${channel.name}" and '
-      'ALL its deployments?',
-    )) {
+    if (!confirmContinue(prompt: 'Delete channel "${channel.name}"')) {
       CliLog.info("Deletion canceled.\n");
       return;
     }
@@ -51,10 +48,7 @@ class ChannelDeleteCommand extends BaseCommand {
     final deleting = spinnerWorking(
       inProgressPrompt: 'Deleting channel "${channel.name}"...',
       done: () {
-        return deletes != null
-            ? '${plural(deletes.channels, "channel")}, '
-                  '${plural(deletes.deployments, "deployment")} deleted.\n'
-            : 'Done!\n';
+        return deletes != null ? '${plural(deletes.channels, "channel")} deleted.\n' : 'Done!\n';
       },
     );
 

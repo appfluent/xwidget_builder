@@ -28,6 +28,7 @@ const defaultStatusMessages = <int, String>{
 };
 
 class CloudApi extends RestApi {
+  final apiVersion = 'v2';
   final storage = SecureStorage();
 
   CloudApi() : super(baseUrl: getApiUrl());
@@ -180,7 +181,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/workspace/usages',
+      path: '/api/$apiVersion/workspace/usages',
       queryParams: {'workspaceId': workspaceId},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -190,12 +191,12 @@ class CloudApi extends RestApi {
     return usages.map((o) => Usage.fromJson(o)).toList();
   }
 
-  Future<Workspace?> lookupWorkspace(String name, {bool strict = true}) async {
+  Future<Workspace?> lookupWorkspace(String name, {bool mustExist = true}) async {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/lookup/workspace',
-      queryParams: {'workspaceName': name, 'strict': strict},
+      path: '/api/$apiVersion/lookup/workspace',
+      queryParams: {'workspaceName': name, 'mustExist': mustExist},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
 
@@ -208,7 +209,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/workspaces',
+      path: '/api/$apiVersion/workspaces',
       headers: {'Authorization': 'Bearer $sessionId'},
     );
 
@@ -221,7 +222,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'POST',
-      path: '/api/workspace/rename',
+      path: '/api/$apiVersion/workspace/rename',
       data: {'workspaceId': workspaceId, 'name': name},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -233,13 +234,13 @@ class CloudApi extends RestApi {
   // project methods
   //-----------------------------------
 
-  Future<Project?> lookupProject(String workspaceId, String name, {bool strict = true}) async {
+  Future<Project?> lookupProject(String workspaceId, String name, {bool mustExist = true}) async {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/lookup/project',
-      queryParams: {'workspaceId': workspaceId, 'projectName': name, 'strict': strict},
+      path: '/api/$apiVersion/lookup/project',
       headers: {'Authorization': 'Bearer $sessionId'},
+      queryParams: {'workspaceId': workspaceId, 'projectName': name, 'mustExist': mustExist},
     );
 
     checkResponse(res, context: 'Failed to retrieve project "$name".');
@@ -251,7 +252,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'POST',
-      path: '/api/projects',
+      path: '/api/$apiVersion/projects',
       data: {'workspaceId': workspaceId, 'name': name, 'description': desc},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -266,7 +267,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'POST',
-      path: '/api/project/rename',
+      path: '/api/$apiVersion/project/rename',
       data: {'projectId': projectId, 'name': name},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -278,7 +279,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/project',
+      path: '/api/$apiVersion/project',
       queryParams: {'projectId': projectId},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -291,7 +292,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/project/keys',
+      path: '/api/$apiVersion/project/keys',
       queryParams: {'projectId': projectId},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -304,7 +305,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'POST',
-      path: '/api/project/rotate-key',
+      path: '/api/$apiVersion/project/rotate-key',
       queryParams: {'projectId': projectId, 'graceDays': graceDays},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -317,7 +318,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/projects',
+      path: '/api/$apiVersion/projects',
       queryParams: {'workspaceId': workspaceId},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -331,7 +332,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'DELETE',
-      path: '/api/projects',
+      path: '/api/$apiVersion/projects',
       queryParams: {'projectId': projectId},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -345,13 +346,13 @@ class CloudApi extends RestApi {
   // channels methods
   //-----------------------------------
 
-  Future<Channel?> lookupChannel(String projectId, String name, {bool strict = true}) async {
+  Future<Channel?> lookupChannel(String projectId, String name, {bool mustExist = true}) async {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/lookup/channel',
-      queryParams: {'projectId': projectId, 'channelName': name, 'strict': strict},
+      path: '/api/$apiVersion/lookup/channel',
       headers: {'Authorization': 'Bearer $sessionId'},
+      queryParams: {'projectId': projectId, 'channelName': name, 'mustExist': mustExist},
     );
 
     checkResponse(res, context: 'Failed to retrieve channel "$name".');
@@ -363,7 +364,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'POST',
-      path: '/api/channels',
+      path: '/api/$apiVersion/channels',
       data: {'projectId': projectId, 'channelName': name},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -378,7 +379,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'POST',
-      path: '/api/channel/rename',
+      path: '/api/$apiVersion/channel/rename',
       data: {'channelId': channelId, 'name': name},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -390,7 +391,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/channels',
+      path: '/api/$apiVersion/channels',
       queryParams: {'projectId': projectId},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -404,7 +405,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'DELETE',
-      path: '/api/channels',
+      path: '/api/$apiVersion/channels',
       queryParams: {'channelId': channelId},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -418,7 +419,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'DELETE',
-      path: '/api/channels',
+      path: '/api/$apiVersion/channels',
       queryParams: {'projectId': projectId},
       headers: {'Authorization': 'Bearer $sessionId'},
     );
@@ -432,6 +433,54 @@ class CloudApi extends RestApi {
   // deployment methods
   //-----------------------------------
 
+  Future<bool> hasDeployments({String? projectId, String? version, int? revision}) async {
+    final sessionId = await getSessionId();
+    final res = await apiRequest(
+      method: 'GET',
+      path: '/api/$apiVersion/deployments/has-any',
+      headers: {'Authorization': 'Bearer $sessionId'},
+      queryParams: {
+        if (projectId != null) 'projectId': projectId,
+        if (version != null) 'version': version,
+        if (revision != null) 'revision': revision,
+      },
+    );
+
+    checkResponse(res, context: 'Failed to check for deployments.');
+    final exists = res.data['data']?['exists'];
+    if (exists is! bool) {
+      throw CloudException('Unexpected response: "exists" missing or not a bool.');
+    }
+    return exists;
+  }
+
+  Future<bool> hasLiveDeployments({
+    String? projectId,
+    String? channelId,
+    String? version,
+    int? revision,
+  }) async {
+    final sessionId = await getSessionId();
+    final res = await apiRequest(
+      method: 'GET',
+      path: '/api/$apiVersion/deployments/has-live',
+      headers: {'Authorization': 'Bearer $sessionId'},
+      queryParams: {
+        if (projectId != null) 'projectId': projectId,
+        if (channelId != null) 'channelId': channelId,
+        if (version != null) 'version': version,
+        if (revision != null) 'revision': revision,
+      },
+    );
+
+    checkResponse(res, context: 'Failed to check for live deployments.');
+    final live = res.data['data']?['live'];
+    if (live is! bool) {
+      throw CloudException('Unexpected response: "live" missing or not a bool.');
+    }
+    return live;
+  }
+
   Future<List<Deployment>> getDeployments({
     required String projectId,
     String? channelId,
@@ -441,14 +490,14 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/deployments',
+      path: '/api/$apiVersion/deployments',
+      headers: {'Authorization': 'Bearer $sessionId'},
       queryParams: {
         'projectId': projectId,
         if (channelId != null) 'channelId': channelId,
         if (version != null) 'version': version,
         'limit': limit,
       },
-      headers: {'Authorization': 'Bearer $sessionId'},
     );
 
     checkResponse(res, context: 'Failed to retrieve deployments.');
@@ -459,14 +508,14 @@ class CloudApi extends RestApi {
   Future<Deployment?> getDeploymentSummary(
     String channelId,
     String version, {
-    bool strict = true,
+    bool mustExist = true,
   }) async {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/deployment/summary',
-      queryParams: {'channelId': channelId, 'version': version, 'strict': strict},
+      path: '/api/$apiVersion/deployment/summary',
       headers: {'Authorization': 'Bearer $sessionId'},
+      queryParams: {'channelId': channelId, 'version': version, 'mustExist': mustExist},
     );
 
     checkResponse(res, context: 'Failed to retrieve deployment.');
@@ -474,23 +523,18 @@ class CloudApi extends RestApi {
     return data != null ? Deployment.fromJson(data) : null;
   }
 
-  Future<Map<String, String>> createDeployment({
-    required String channelId,
+  Future<({String id, int? revision})> createDeployment({
+    required String projectId,
     required String version,
     required List<int> tarball,
     String? notes,
-    bool activate = true,
   }) async {
     final sessionId = await getSessionId();
     final res = await apiMultipart(
-      path: '/api/deployments/deploy',
-      queryParams: {'channelId': channelId},
+      path: '/api/$apiVersion/deployments/deploy',
+      queryParams: {'projectId': projectId},
       headers: {'Authorization': 'Bearer $sessionId'},
-      fields: {
-        'version': version,
-        if (notes != null) 'notes': notes,
-        'activate': activate.toString(),
-      },
+      fields: {'version': version, if (notes != null) 'notes': notes},
       file: tarball,
       filename: '$version.tar.gz',
     );
@@ -498,40 +542,66 @@ class CloudApi extends RestApi {
     checkResponse(res, context: 'Failed to create deployment.');
 
     final data = res.data['data'];
-    return {'id': data['id'] as String};
+    // revision is minted server-side at deploy; tolerate servers that omit it
+    final revision = data['revision'];
+    return (id: data['id'] as String, revision: revision is num ? revision.toInt() : null);
   }
 
-  Future<Map<String, dynamic>> promoteDeployment({
-    required String fromChannelId,
-    required String toChannelId,
-    required String version,
+  Future<String> publishDeployment({
+    required String channelId,
+    String? deploymentId,
+    String? projectId,
+    String? version,
+    int? revision,
   }) async {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'POST',
-      path: '/api/deployments/promote',
-      queryParams: {'fromChannelId': fromChannelId, 'toChannelId': toChannelId, 'version': version},
+      path: '/api/$apiVersion/deployments/publish',
       headers: {'Authorization': 'Bearer $sessionId'},
+      queryParams: {
+        'channelId': channelId,
+        if (deploymentId != null) 'deploymentId': deploymentId,
+        if (projectId != null) 'projectId': projectId,
+        if (version != null) 'version': version,
+        if (revision != null) 'revision': revision,
+      },
     );
 
-    checkResponse(res, context: 'Failed to promote deployment.');
+    checkResponse(res, context: 'Failed to publish deployment.');
 
     final data = res.data['data'];
-    return {'id': data['id'] as String};
+    return data['id'] as String;
   }
 
-  Future<void> deleteDeployments({String? projectId, String? channelId, String? version}) async {
+  Future<void> unpublishDeployment({required String channelId, required version}) async {
     final sessionId = await getSessionId();
+    final res = await apiRequest(
+      method: 'POST',
+      path: '/api/$apiVersion/deployments/unpublish',
+      headers: {'Authorization': 'Bearer $sessionId'},
+      queryParams: {'channelId': channelId, 'version': version},
+    );
 
-    if (projectId == null && channelId == null) {
-      CloudException('Either "channel" or "project" is required');
-    }
+    checkResponse(res, context: 'Failed to unpublish deployment.');
+  }
+
+  Future<void> deleteDeployments({
+    required String projectId,
+    String? version,
+    int? revision,
+  }) async {
+    final sessionId = await getSessionId();
 
     final res = await apiRequest(
       method: 'DELETE',
-      path: '/api/deployments',
-      queryParams: {'projectId': projectId, 'channelId': channelId, 'version': version},
+      path: '/api/$apiVersion/deployments',
       headers: {'Authorization': 'Bearer $sessionId'},
+      queryParams: {
+        'projectId': projectId,
+        if (version != null) 'version': version,
+        if (revision != null) 'revision': revision,
+      },
     );
 
     checkResponse(res, context: 'Failed to delete deployments for channel.');
@@ -548,6 +618,7 @@ class CloudApi extends RestApi {
     String? projectId,
     String? channel,
     String? version,
+    int? revision,
     String? platform,
     String? fragment,
     String? locale,
@@ -556,7 +627,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/query/renders',
+      path: '/api/$apiVersion/query/renders',
       queryParams: {
         'startDate': formatDate(startDate),
         'endDate': formatDate(endDate),
@@ -564,6 +635,7 @@ class CloudApi extends RestApi {
         if (projectId != null) 'projectId': projectId,
         if (channel != null) 'channel': channel,
         if (version != null) 'version': version,
+        if (revision != null) 'revision': revision,
         if (platform != null) 'platform': platform,
         if (fragment != null) 'fragment': fragment,
         if (locale != null) 'locale': locale,
@@ -584,6 +656,7 @@ class CloudApi extends RestApi {
     String? projectId,
     String? channel,
     String? version,
+    int? revision,
     String? platform,
     String? locale,
     String? country,
@@ -591,7 +664,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/query/downloads',
+      path: '/api/$apiVersion/query/downloads',
       queryParams: {
         'startDate': formatDate(startDate),
         'endDate': formatDate(endDate),
@@ -599,6 +672,7 @@ class CloudApi extends RestApi {
         if (projectId != null) 'projectId': projectId,
         if (channel != null) 'channel': channel,
         if (version != null) 'version': version,
+        if (revision != null) 'revision': revision,
         if (platform != null) 'platform': platform,
         if (locale != null) 'locale': locale,
         if (country != null) 'country': country,
@@ -618,6 +692,7 @@ class CloudApi extends RestApi {
     String? projectId,
     String? channel,
     String? version,
+    int? revision,
     String? platform,
     String? fragment,
     String? locale,
@@ -627,7 +702,7 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/query/errors',
+      path: '/api/$apiVersion/query/errors',
       queryParams: {
         'startDate': formatDate(startDate),
         'endDate': formatDate(endDate),
@@ -635,6 +710,7 @@ class CloudApi extends RestApi {
         if (projectId != null) 'projectId': projectId,
         if (channel != null) 'channel': channel,
         if (version != null) 'version': version,
+        if (revision != null) 'revision': revision,
         if (platform != null) 'platform': platform,
         if (fragment != null) 'fragment': fragment,
         if (locale != null) 'locale': locale,
@@ -655,6 +731,7 @@ class CloudApi extends RestApi {
     String? projectId,
     String? channel,
     String? version,
+    int? revision,
     String? platform,
     String? fromPage,
     String? toPage,
@@ -664,13 +741,14 @@ class CloudApi extends RestApi {
     final sessionId = await getSessionId();
     final res = await apiRequest(
       method: 'GET',
-      path: '/api/query/transitions',
+      path: '/api/$apiVersion/query/transitions',
       queryParams: {
         'startDate': formatDate(startDate),
         'endDate': formatDate(endDate),
         if (projectId != null) 'projectId': projectId,
         if (channel != null) 'channel': channel,
         if (version != null) 'version': version,
+        if (revision != null) 'revision': revision,
         if (platform != null) 'platform': platform,
         if (fromPage != null) 'fromPage': fromPage,
         if (toPage != null) 'toPage': toPage,

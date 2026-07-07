@@ -6,7 +6,6 @@ import 'package:interact2/interact2.dart';
 import '../utils/ansi.dart';
 import '../utils/cli_log.dart';
 import '../utils/project_config.dart';
-import '../utils/prompts.dart';
 import 'api/api_models.dart';
 import 'api/cloud_api.dart';
 
@@ -14,7 +13,6 @@ enum Existence { mustExist, mustNotExist }
 
 abstract class BaseCommand extends Command {
   final api = CloudApi();
-  final versionRegex = RegExp(r'^\d+\.\d+\.\d+(?:\+.+)?$');
 
   @override
   Future<void> run() async {
@@ -80,13 +78,6 @@ abstract class BaseCommand extends Command {
     return channel!;
   }
 
-  Future<bool> confirmOverwriteVersion(String channelId, String version) async {
-    final existing = await api.getDeploymentSummary(channelId, version, strict: false);
-    if (existing == null) return true;
-
-    return confirmContinue("Version ${existing.version} already exists. Overwrite?");
-  }
-
   Future<Workspace> selectWorkspace([String prompt = "Select workspace:"]) async {
     final workspaces = await api.getWorkspaces();
 
@@ -137,7 +128,7 @@ abstract class BaseCommand extends Command {
           throw ValidationError("Project name exceeds max length of 64 characters.");
         }
         if (existence != null) {
-          final existing = await api.lookupProject(workspaceId, value, strict: false);
+          final existing = await api.lookupProject(workspaceId, value, mustExist: false);
           if (existing != null && existence == Existence.mustNotExist) {
             throw ValidationError("A project named '$value' already exists.");
           }
@@ -218,7 +209,7 @@ abstract class BaseCommand extends Command {
           );
         }
         if (existence != null) {
-          final existing = await api.lookupChannel(projectId, value, strict: false);
+          final existing = await api.lookupChannel(projectId, value, mustExist: false);
           if (existing != null && existence == Existence.mustNotExist) {
             throw ValidationError("A channel named '$value' already exists.");
           }
@@ -234,12 +225,11 @@ abstract class BaseCommand extends Command {
     return name.trim();
   }
 
-  Future<String> inputVersion(
-    String channelId,
-    String channelName, {
+  Future<String?> inputVersion({
     String? initialText,
     String? defaultValue,
-    Existence? existence,
+    bool isRequired = false,
+    dynamic Function(String)? validator,
   }) async {
     final asyncInput = AsyncInput(
       prompt: 'Deployment version:',
@@ -247,32 +237,22 @@ abstract class BaseCommand extends Command {
       initialText: initialText ?? "",
       validator: (input) async {
         final value = input.trim();
-        if (value.isEmpty) {
+        if (isRequired && value.isEmpty) {
           throw ValidationError("Version is required.");
         }
-        if (value.length > 30) {
-          throw ValidationError("Must be 30 characters or less.");
-        }
-        if (!versionRegex.hasMatch(value)) {
-          throw ValidationError(
-            "Must be in semver format: major.minor.patch "
-            "(e.g. 1.0.0 or 1.0.0+build.1)",
-          );
-        }
-        if (existence != null) {
-          final existing = await api.getDeploymentSummary(channelId, value, strict: false);
-          if (existing != null && existence == Existence.mustNotExist) {
+        if (value.isNotEmpty) {
+          if (value.length > 50) {
+            throw ValidationError("Version must be <= 50 characters.");
+          }
+          if (!isValidVersion(value)) {
             throw ValidationError(
-              "Version '${existing.version}' has already "
-              "been deployed to channel '$channelName'.",
+              "Version must be of the format "
+              "{major}.{minor}.{patch}[-{prerelease}][+{build_number}]",
             );
           }
-          if (existing == null && existence == Existence.mustExist) {
-            throw ValidationError(
-              "Version '$value' not deployed "
-              "to '$channelName'.",
-            );
-          }
+        }
+        if (validator != null) {
+          await validator(value);
         }
         return true;
       },
@@ -280,7 +260,94 @@ abstract class BaseCommand extends Command {
 
     CliLog.resetBlankLines();
     final version = await asyncInput.interact();
-    return version.trim();
+    final value = version.trim();
+    // validate + normalize (strips leading zeros to canonical form)
+    return value.isEmpty ? null : normalizeVersion(value);
+  }
+
+  Future<String?> inputRevision({
+    String? initialText,
+    String? defaultValue,
+    bool isRequired = false,
+    dynamic Function(String)? validator,
+  }) async {
+    final asyncInput = AsyncInput(
+      prompt: 'Deployment revision:',
+      defaultValue: defaultValue,
+      initialText: initialText ?? "",
+      validator: (input) async {
+        final value = input.trim();
+        if (isRequired && value.isEmpty) {
+          throw ValidationError("Revision is required.");
+        }
+        if (value.isNotEmpty) {
+          if (!RegExp(r'^\d+$').hasMatch(value)) {
+            throw ValidationError("Revision must contain only digits.");
+          }
+          // tryParse returns null on overflow (value exceeds max int)
+          final revision = int.tryParse(value);
+          if (revision == null) {
+            throw ValidationError("Revision is too large.");
+          }
+          if (revision < 0) {
+            throw ValidationError("Revision must be >= 0.");
+          }
+        }
+        if (validator != null) {
+          await validator(value);
+        }
+        return true;
+      },
+    );
+
+    CliLog.resetBlankLines();
+    final revision = await asyncInput.interact();
+    final value = revision.trim();
+    return value.isEmpty ? null : value;
+  }
+
+  /// Validates and normalizes a version string.
+  ///
+  /// Accepts {major}.{minor}.{patch}[-{prerelease}][+{build}] where the numeric
+  /// parts may contain leading zeros (as Flutter/iOS/Android permit). Strips
+  /// leading zeros from each numeric component so the stored form matches the
+  /// device's canonical version (iOS treats 1.02.3 as 1.2.3). Throws on input
+  /// that doesn't match the version format.
+  String normalizeVersion(String version) {
+    // build is numeric only; prerelease allows alphanumerics, dots, hyphens.
+    // leading zeros permitted here and stripped below.
+    final versionRegex = RegExp(r'^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+\d+)?$');
+    if (!versionRegex.hasMatch(version)) {
+      throw ValidationError('Invalid version format: "$version".');
+    }
+
+    // split off build (+) and prerelease (-) so only numeric parts are touched
+    final buildSplit = version.split('+');
+    final core = buildSplit[0];
+    final build = buildSplit.length > 1 ? buildSplit[1] : null;
+
+    final preSplit = core.split('-');
+    final mmp = preSplit[0]; // major.minor.patch
+    final prerelease = preSplit.length > 1 ? preSplit.sublist(1).join('-') : null;
+
+    // strip leading zeros from each of major.minor.patch (preserve a lone zero)
+    final normalizedCore = mmp
+        .split('.')
+        .map((part) => part.replaceFirst(RegExp(r'^0+(?=\d)'), ''))
+        .join('.');
+
+    // strip leading zeros from the numeric build (preserve a lone zero)
+    final normalizedBuild = build?.replaceFirst(RegExp(r'^0+(?=\d)'), '');
+
+    var result = normalizedCore;
+    if (prerelease != null) result += '-$prerelease';
+    if (normalizedBuild != null) result += '+$normalizedBuild';
+    return result;
+  }
+
+  bool isValidVersion(String version) {
+    final versionRegex = RegExp(r'^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+\d+)?$');
+    return versionRegex.hasMatch(version);
   }
 
   /// Returns the positional argument at [index], or null if not provided.

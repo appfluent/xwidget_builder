@@ -53,16 +53,27 @@ class DeploymentListCommand extends BaseCommand {
 
     printTitle(project: project);
     printTable(
-      ['Channel', 'Version', 'Size (KB)', 'Deployed By', 'Created At', "Updated At"],
+      [
+        'Version',
+        'Revision',
+        'Size (KB)',
+        'Created By',
+        'Created At',
+        'Updated By',
+        "Updated At",
+        'Channels',
+      ],
       deployments
           .map(
             (d) => [
-              d.channelName,
               d.version,
+              d.revision,
               (d.sizeBytes / 1000).toStringAsFixed(1),
-              d.deployedByUserName ?? '',
+              d.createdByName ?? '',
               d.createdAt,
+              d.updatedByName ?? '',
               d.updatedAt,
+              d.channelsNames.join(','),
             ],
           )
           .toList(),

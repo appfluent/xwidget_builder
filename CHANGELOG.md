@@ -1,3 +1,41 @@
+## 0.6.0
+
+- Upgraded the `analyzer` dependency from 7.x to `>=13.0.0 <14.0.0`. Generated output is
+  unchanged. Note: projects on current Flutter stable will resolve analyzer 13.0.0 (its
+  `flutter_test` pins `meta 1.18.0`, which analyzer 13.1+ does not accept); newer analyzer
+  versions resolve automatically once Flutter updates its `meta` pin.
+- Minimum Dart SDK is now 3.9; minimum Flutter is 3.35 (the release that ships it).
+- Fixed a crash when resolving type parameters with no supplied type arguments; they now
+  fall back to `dynamic`.
+- Moved the cloud CLI to the XWidget Cloud v2 deployment model. All endpoints now use
+  `/api/v2`; older CLI versions are rejected by the server with an upgrade notice.
+- BREAKING: `xc cloud deploy` no longer takes `--channel`. Deploying uploads the bundle and
+  mints a monotonic per-version revision, then offers to publish it. Requires xwidget >= 0.6.0
+  in the target app.
+- BREAKING: `xc cloud promote` is replaced by `xc cloud publish` and `xc cloud unpublish`.
+  Publishing points a channel at a chosen revision — covering promotion and rollback —
+  and unpublishing removes the channel's pointer without deleting the deployment.
+- BREAKING: `xc cloud deployment delete` now deletes by project and version, optionally
+  scoped to a single revision; channel-scoped deletion is removed. Revisions live on a
+  channel must be unpublished before they can be deleted.
+- `xc cloud deployment list` now shows Version, Revision, Created By, Updated By, and the
+  channels currently serving each deployment.
+- Version format: build metadata must be a plain number (`1.2.0+42`); pre-release
+  identifiers are now accepted. The full version string, including the build number,
+  identifies the deployment and scopes its revision counter.
+- Added `--yes` to publish, unpublish, and deployment delete for non-interactive use. The
+  channel name `local` is reserved.
+- Added `--publish <channel>` (`-p`) to `xc cloud deploy` — deploys and publishes the new
+  revision to an existing channel in one step. The channel is validated before the upload;
+  if the upload succeeds but publishing fails, the CLI prints the recovery
+  `xc cloud publish` command and exits non-zero. Deploy output now includes the minted
+  revision.
+- `xc cloud deploy` now runs fully non-interactive without a TTY: prompts are skipped,
+  `--version` is required, unconfigured resource paths fall back to the defaults, and
+  first-time project creation is refused (run interactively once to create the project).
+- Rewrote the builder test suite as an end-to-end CLI harness with a golden output baseline
+  and error-path coverage.
+
 ## 0.5.4
 
 - Updated the generated schema documentation for `<callback>` to match the corrected runtime

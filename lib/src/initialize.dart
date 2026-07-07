@@ -78,7 +78,7 @@ class InitializeCommand extends FlexCommand {
   }
 
   Future<bool> initNewApp() async {
-    final overwrite = confirmContinue('Overwrite your current project?');
+    final overwrite = confirmContinue(prompt: 'Overwrite your current project?');
     if (overwrite) {
       CliLog.info("\nInitializing new project...");
       final pubspec = await YamlEditor.parseFromFile(pubspecPath);

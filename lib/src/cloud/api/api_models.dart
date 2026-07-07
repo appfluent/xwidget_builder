@@ -112,63 +112,60 @@ class Channel {
 
 class ChannelDeletes {
   final int channels;
-  final int deployments;
 
-  ChannelDeletes({required this.channels, required this.deployments});
+  ChannelDeletes({required this.channels});
 
   factory ChannelDeletes.fromJson(Map<String, dynamic> json) {
-    return ChannelDeletes(channels: json['channels'], deployments: json['deployments']);
+    return ChannelDeletes(channels: json['channels']);
   }
 }
 
 class Deployment {
   final String id;
-  final String channelId;
-  final String? channelName;
-  final String versionNumber;
-  final String? versionMetadata;
+  final String version;
+  final int revision;
   final String? notes;
   final int sizeBytes;
-  final String? deployedByUserName;
+  final String? createdByName;
   final int createdAt;
+  final String? updatedByName;
   final int updatedAt;
+  final List<String> channelsNames;
 
   Deployment({
     required this.id,
-    required this.channelId,
-    this.channelName,
-    required this.versionNumber,
-    this.versionMetadata,
+    required this.version,
+    required this.revision,
     this.notes,
     required this.sizeBytes,
-    this.deployedByUserName,
+    this.createdByName,
     required this.createdAt,
+    this.updatedByName,
     required this.updatedAt,
+    this.channelsNames = const <String>[],
   });
-
-  String get version => versionMetadata != null ? '$versionNumber+$versionMetadata' : versionNumber;
 
   factory Deployment.fromJson(Map<String, dynamic> json) {
     return Deployment(
       id: json['id'],
-      channelId: json['channelId'],
-      channelName: json['channelName'],
-      versionNumber: json['versionNumber'],
-      versionMetadata: json['versionMetadata'],
+      version: json['version'],
+      revision: json['revision'],
       notes: json['notes'],
       sizeBytes: json['sizeBytes'],
-      deployedByUserName: json['deployedByUserName'],
+      createdByName: json['createdByName'],
       createdAt: json['createdAt'],
+      updatedByName: json['updatedByName'],
       updatedAt: json['updatedAt'],
+      channelsNames: (json['channelNames'] as List?)?.cast<String>() ?? [],
     );
   }
 }
 
-class RenderAnalytics with AnalyticsMixin {
+class RenderAnalytics {
   final String period;
   final String channel;
-  final String versionNumber;
-  final String versionMetadata;
+  final String version;
+  final int? revision;
   final String fragment;
   final String platform;
   final String locale;
@@ -179,8 +176,8 @@ class RenderAnalytics with AnalyticsMixin {
   RenderAnalytics({
     required this.period,
     required this.channel,
-    required this.versionNumber,
-    required this.versionMetadata,
+    required this.version,
+    this.revision,
     required this.fragment,
     required this.platform,
     required this.locale,
@@ -193,8 +190,8 @@ class RenderAnalytics with AnalyticsMixin {
     return RenderAnalytics(
       period: json['period'] ?? '',
       channel: json['channel'] ?? '',
-      versionNumber: json['version_number'] ?? '',
-      versionMetadata: json['version_metadata'] ?? '',
+      version: json['version'] ?? '',
+      revision: json['revision'],
       fragment: json['fragment'] ?? '',
       platform: json['platform'] ?? '',
       locale: json['locale'] ?? '',
@@ -207,9 +204,8 @@ class RenderAnalytics with AnalyticsMixin {
   Map<String, dynamic> toJson() => {
     'period': period,
     'channel': channel,
-    'version': fullVersion(versionNumber, versionMetadata),
-    'versionNumber': versionNumber,
-    'versionMetadata': versionMetadata,
+    'version': version,
+    'revision': revision,
     'fragment': fragment,
     'platform': platform,
     'locale': locale,
@@ -219,11 +215,11 @@ class RenderAnalytics with AnalyticsMixin {
   };
 }
 
-class DownloadAnalytics with AnalyticsMixin {
+class DownloadAnalytics {
   final String period;
   final String channel;
-  final String versionNumber;
-  final String versionMetadata;
+  final String version;
+  final int? revision;
   final String platform;
   final String locale;
   final String countryCode;
@@ -234,8 +230,8 @@ class DownloadAnalytics with AnalyticsMixin {
   DownloadAnalytics({
     required this.period,
     required this.channel,
-    required this.versionNumber,
-    required this.versionMetadata,
+    required this.version,
+    this.revision,
     required this.platform,
     required this.locale,
     required this.countryCode,
@@ -248,8 +244,8 @@ class DownloadAnalytics with AnalyticsMixin {
     return DownloadAnalytics(
       period: json['period'] ?? '',
       channel: json['channel'] ?? '',
-      versionNumber: json['version_number'] ?? '',
-      versionMetadata: json['version_metadata'] ?? '',
+      version: json['version'] ?? '',
+      revision: json['revision'],
       platform: json['platform'] ?? '',
       locale: json['locale'] ?? '',
       countryCode: json['country_code'] ?? '',
@@ -262,9 +258,8 @@ class DownloadAnalytics with AnalyticsMixin {
   Map<String, dynamic> toJson() => {
     'period': period,
     'channel': channel,
-    'version': fullVersion(versionNumber, versionMetadata),
-    'versionNumber': versionNumber,
-    'versionMetadata': versionMetadata,
+    'version': version,
+    'revision': revision,
     'platform': platform,
     'locale': locale,
     'countryCode': countryCode,
@@ -274,11 +269,11 @@ class DownloadAnalytics with AnalyticsMixin {
   };
 }
 
-class ErrorAnalytics with AnalyticsMixin {
+class ErrorAnalytics {
   final String period;
   final String channel;
-  final String versionNumber;
-  final String versionMetadata;
+  final String version;
+  final int? revision;
   final String fragment;
   final String platform;
   final String locale;
@@ -289,8 +284,8 @@ class ErrorAnalytics with AnalyticsMixin {
   ErrorAnalytics({
     required this.period,
     required this.channel,
-    required this.versionNumber,
-    required this.versionMetadata,
+    required this.version,
+    this.revision,
     required this.fragment,
     required this.platform,
     required this.locale,
@@ -303,8 +298,8 @@ class ErrorAnalytics with AnalyticsMixin {
     return ErrorAnalytics(
       period: json['period'] ?? '',
       channel: json['channel'] ?? '',
-      versionNumber: json['version_number'] ?? '',
-      versionMetadata: json['version_metadata'] ?? '',
+      version: json['version'] ?? '',
+      revision: json['revision'] ?? '',
       fragment: json['fragment'] ?? '',
       platform: json['platform'] ?? '',
       locale: json['locale'] ?? '',
@@ -317,9 +312,8 @@ class ErrorAnalytics with AnalyticsMixin {
   Map<String, dynamic> toJson() => {
     'period': period,
     'channel': channel,
-    'version': fullVersion(versionNumber, versionMetadata),
-    'versionNumber': versionNumber,
-    'versionMetadata': versionMetadata,
+    'version': version,
+    'revision': revision,
     'fragment': fragment,
     'platform': platform,
     'locale': locale,
@@ -329,10 +323,10 @@ class ErrorAnalytics with AnalyticsMixin {
   };
 }
 
-class TransitionAnalytics with AnalyticsMixin {
+class TransitionAnalytics {
   final String channel;
-  final String versionNumber;
-  final String versionMetadata;
+  final String version;
+  final int revision;
   final String platform;
   final String locale;
   final String countryCode;
@@ -344,8 +338,8 @@ class TransitionAnalytics with AnalyticsMixin {
 
   TransitionAnalytics({
     required this.channel,
-    required this.versionNumber,
-    required this.versionMetadata,
+    required this.version,
+    required this.revision,
     required this.platform,
     required this.locale,
     required this.countryCode,
@@ -359,8 +353,8 @@ class TransitionAnalytics with AnalyticsMixin {
   factory TransitionAnalytics.fromJson(Map<String, dynamic> json) {
     return TransitionAnalytics(
       channel: json['channel'] ?? '',
-      versionNumber: json['version_number'] ?? '',
-      versionMetadata: json['version_metadata'] ?? '',
+      version: json['version'] ?? '',
+      revision: json['revision'] ?? '',
       platform: json['platform'] ?? '',
       locale: json['locale'] ?? '',
       countryCode: json['country_code'] ?? '',
@@ -374,9 +368,8 @@ class TransitionAnalytics with AnalyticsMixin {
 
   Map<String, dynamic> toJson() => {
     'channel': channel,
-    'version': fullVersion(versionNumber, versionMetadata),
-    'versionNumber': versionNumber,
-    'versionMetadata': versionMetadata,
+    'version': version,
+    'revision': revision,
     'platform': platform,
     'locale': locale,
     'countryCode': countryCode,
@@ -386,14 +379,4 @@ class TransitionAnalytics with AnalyticsMixin {
     'percentage': percentage,
     'avgDurationSeconds': avgDurationSeconds,
   };
-}
-
-mixin AnalyticsMixin {
-  String? fullVersion(String? number, String? metadata) {
-    return number != null && number.isNotEmpty
-        ? metadata != null && metadata.isNotEmpty
-              ? '$number+$metadata'
-              : number
-        : null;
-  }
 }

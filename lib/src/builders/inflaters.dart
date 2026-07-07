@@ -63,8 +63,7 @@ class InflaterBuilder extends SpecBuilder {
       }
 
       // found source library
-      for (final element in library.topLevelElements) {
-        if (element is! PropertyAccessorElement) continue;
+      for (final element in library.getters) {
         if (element.returnType.toString() == "InvalidType") {
           CliLog.error("InvalidType for property '$element' in '${basename(path)}'");
           continue;
@@ -74,7 +73,7 @@ class InflaterBuilder extends SpecBuilder {
         final contexts = <InflaterContext>[];
         if (element.name == "inflaters") {
           // found a list of class to create inflaters for
-          final inflaterSpecs = element.variable2?.computeConstantValue()?.toListValue()?.toSet();
+          final inflaterSpecs = element.variable.computeConstantValue()?.toListValue()?.toSet();
           if (inflaterSpecs != null) {
             for (final inflaterSpec in inflaterSpecs) {
               final inflaterType = inflaterSpec.toTypeValue();
@@ -96,9 +95,10 @@ class InflaterBuilder extends SpecBuilder {
 
         // process all class elements
         for (final context in contexts) {
-          final annotations = decodeMetadata(context.classElement.metadata);
+          final annotations = decodeMetadata(context.classElement.metadata.annotations);
           for (final constructor in context.classElement.constructors) {
-            if (!constructor.isPrivate && (!constructor.hasDeprecated || config.allowDeprecated)) {
+            if (!constructor.isPrivate &&
+                (!constructor.metadata.hasDeprecated || config.allowDeprecated)) {
               // build inflater from constructor metadata
               final inflater = _buildInflaterClass(context, constructor, annotations);
               inflaters.write(inflater[0]);
@@ -187,24 +187,26 @@ class InflaterBuilder extends SpecBuilder {
         _buildInflaterName(context, constructorName, ".");
     final inflatesOwnChildren =
         annotations[inflaterDefAnnotation]?[inflatesOwnChildrenParam] ?? false;
-    final inflaterReturnType = context.classElement.name;
+    final inflaterReturnType = context.classElement.displayName;
 
-    for (final param in constructor.parameters) {
-      if (!param.hasDeprecated || param.isRequired || config.allowDeprecated) {
+    for (final param in constructor.formalParameters) {
+      if (!param.metadata.hasDeprecated || param.isRequired || config.allowDeprecated) {
         final paramType = param.type.displayStringWithoutNullability();
         if (paramType != "InvalidType") {
-          if (inflaterConfig.isNotExcludedConstructorArg(constructorName, param.name)) {
+          if (inflaterConfig.isNotExcludedConstructorArg(constructorName, param.displayName)) {
             final privateAccess = isPrivateAccessParam(param, isCustomWidget);
             constructorArgs.write(
               _buildConstructorArg(constructorName, context, param, privateAccess),
             );
-            if (schemaConfig.isNotExcludedAttribute(constructorName, param.name) &&
+            if (schemaConfig.isNotExcludedAttribute(constructorName, param.displayName) &&
                 !privateAccess) {
               parseCases.write(_buildInflaterParseCase(context, constructorName, param));
             }
           }
         } else {
-          CliLog.error("InvalidType for param '$param' of class '${context.classElement.name}'");
+          CliLog.error(
+            "InvalidType for param '$param' of class '${context.classElement.displayName}'",
+          );
         }
       }
     }
@@ -227,17 +229,20 @@ class InflaterBuilder extends SpecBuilder {
   String _buildConstructorArg(
     String constructorName,
     InflaterContext context,
-    ParameterElement param,
+    FormalParameterElement param,
     bool privateAccess,
   ) {
     final code = StringBuffer();
     code.write("        ");
 
-    final paramName = param.name;
+    final paramName = param.displayName;
     final paramType = param.type;
     final isRequired = param.isRequired;
     final isPositional = param.isPositional;
-    final defaultValue = inflaterConfig.findConstructorArgDefault(constructorName, param.name);
+    final defaultValue = inflaterConfig.findConstructorArgDefault(
+      constructorName,
+      param.displayName,
+    );
 
     if (paramType.isDartCoreMap) {
       final typeArgs = (paramType as ParameterizedType).typeArguments;
@@ -276,14 +281,14 @@ class InflaterBuilder extends SpecBuilder {
       final fnType = paramType;
       final resolvedReturnType = context.resolveToType(fnType.returnType);
       final returnTypeStr = context.resolveToString(fnType.returnType);
-      final paramCount = fnType.parameters.length;
+      final paramCount = fnType.formalParameters.length;
       final paramStr = List.generate(paramCount, (i) => 'p$i').join(', ');
 
       String returnExpr;
       if (returnTypeStr == 'void') {
         returnExpr = 'Function.apply(fn, [$paramStr])';
       } else if (_isCoreCollection(resolvedReturnType)) {
-        final baseType = resolvedReturnType.element!.name;
+        final baseType = resolvedReturnType.element!.displayName;
         final typeArgs = (resolvedReturnType as ParameterizedType).typeArguments
             .map((t) => context.resolveToString(t))
             .join(', ');
@@ -313,10 +318,10 @@ class InflaterBuilder extends SpecBuilder {
   String _buildInflaterParseCase(
     InflaterContext context,
     String constructorName,
-    ParameterElement param,
+    FormalParameterElement param,
   ) {
     final code = StringBuffer();
-    final paramName = param.name;
+    final paramName = param.displayName;
     final paramType = context.resolveToType(param.type);
     final parser = inflaterConfig.findConstructorArgParser(
       constructorName,
@@ -490,10 +495,10 @@ class InflaterBuilder extends SpecBuilder {
         _buildInflaterName(context, constructorName, ".");
     inflaterKeys.add(inflaterKey);
 
-    for (final param in constructor.parameters) {
-      if ((!param.hasDeprecated || config.allowDeprecated) &&
-          inflaterConfig.isNotExcludedConstructorArg(constructorName, param.name) &&
-          schemaConfig.isNotExcludedAttribute(constructorName, param.name) &&
+    for (final param in constructor.formalParameters) {
+      if ((!param.metadata.hasDeprecated || config.allowDeprecated) &&
+          inflaterConfig.isNotExcludedConstructorArg(constructorName, param.displayName) &&
+          schemaConfig.isNotExcludedAttribute(constructorName, param.displayName) &&
           !isPrivateAccessParam(param, isCustomWidget)) {
         final paramType = param.type.element;
         if (paramType is EnumElement && !schemaTypes.containsKey(paramType.name)) {
@@ -537,11 +542,11 @@ class InflaterBuilder extends SpecBuilder {
     return code.toString();
   }
 
-  String _buildSchemaAttribute(InflaterContext context, ParameterElement param) {
+  String _buildSchemaAttribute(InflaterContext context, FormalParameterElement param) {
     final code = StringBuffer();
     final schemaType = _getSchemaAttributeType(param);
     final paramDocs = getParameterDocumentation(context.classElement, param);
-    code.write('                    <xs:attribute name="${param.name}"');
+    code.write('                    <xs:attribute name="${param.displayName}"');
     if (schemaType != null) {
       code.write(' type="$schemaType"');
     }
@@ -556,7 +561,7 @@ class InflaterBuilder extends SpecBuilder {
   }
 
   void _buildSchemaAttributeType(EnumElement enumElement) {
-    final enumName = enumElement.name;
+    final enumName = enumElement.displayName;
     final schemaTypeName = "${enumName}AttributeType";
     final code = StringBuffer();
     code.write('    <xs:simpleType name="$schemaTypeName">\n');
@@ -574,10 +579,10 @@ class InflaterBuilder extends SpecBuilder {
     code.write('            </xs:simpleType>\n');
     code.write('        </xs:union>\n');
     code.write('    </xs:simpleType>\n\n');
-    schemaTypes[enumElement.name] = SchemaType(schemaTypeName, code.toString());
+    schemaTypes[enumElement.displayName] = SchemaType(schemaTypeName, code.toString());
   }
 
-  String? _getSchemaAttributeType(ParameterElement param) {
+  String? _getSchemaAttributeType(FormalParameterElement param) {
     final paramType = param.type.element;
     final paramTypeName = paramType?.name;
     return schemaConfig.findAttributeType(paramTypeName) ?? schemaTypes[paramTypeName]?.name;
@@ -602,8 +607,8 @@ class InflaterContext {
   InflaterContext(this.classElement, this.typeArguments)
     : typeArgumentNames = typeArguments.map((arg) => arg.getDisplayString()).toList(),
       paramToArg = {
-        for (int i = 0; i < classElement.typeParameters.length; i++)
-          classElement.typeParameters[i].name: typeArguments[i],
+        for (int i = 0; i < classElement.typeParameters.length && i < typeArguments.length; i++)
+          classElement.typeParameters[i].displayName: typeArguments[i],
       };
 
   Iterable<String> getTypeArgumentNames({

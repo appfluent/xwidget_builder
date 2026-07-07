@@ -13,9 +13,9 @@ class ImportBuilder {
   Future<void> loadLibraries(Iterable<LibraryElement> libraries, bool addImports) async {
     for (final library in libraries) {
       if (addImports) {
-        for (final importedLib in library.importedLibraries) {
+        for (final importedLib in library.firstFragment.importedLibraries) {
           // added top level imports to imported locations
-          final location = importedLib.location.toString();
+          final location = importedLib.uri.toString();
           if (location != "dart:core") {
             _locations.add(location);
           }
@@ -73,7 +73,7 @@ class ImportResolver {
       if (element != null) {
         final elementLibrary = element.library;
         if (elementLibrary != null) {
-          final uri = elementLibrary.source.uri.toString();
+          final uri = elementLibrary.uri.toString();
           final publicUri = _resolvePublicImport(currType, uri, preferredImports);
 
           // Skip dart:core (implicit)
@@ -96,7 +96,7 @@ class ImportResolver {
         collectImports(currType.returnType);
 
         // Parameter types
-        for (final param in currType.parameters) {
+        for (final param in currType.formalParameters) {
           collectImports(param.type);
         }
       }
@@ -119,7 +119,7 @@ class ImportResolver {
 
     while (toProcess.isNotEmpty) {
       final current = toProcess.removeLast();
-      final uri = current.source.uri.toString();
+      final uri = current.uri.toString();
 
       // Skip if already processed
       if (processed.contains(uri)) continue;
@@ -131,15 +131,15 @@ class ImportResolver {
       }
 
       // Add all imported libraries
-      for (final importedLib in current.importedLibraries) {
-        if (!processed.contains(importedLib.source.uri.toString())) {
+      for (final importedLib in current.firstFragment.importedLibraries) {
+        if (!processed.contains(importedLib.uri.toString())) {
           toProcess.add(importedLib);
         }
       }
 
       // Add all exported libraries
       for (final exportedLib in current.exportedLibraries) {
-        if (!processed.contains(exportedLib.source.uri.toString())) {
+        if (!processed.contains(exportedLib.uri.toString())) {
           toProcess.add(exportedLib);
         }
       }
@@ -148,7 +148,7 @@ class ImportResolver {
 
   void _cacheExportsFromLibrary(LibraryElement library, String publicUri) {
     // Get the defining compilation unit
-    final definingUnit = library.definingCompilationUnit;
+    final definingUnit = library.firstFragment;
     CliLog.fine("processing lib: $publicUri");
 
     // Iterate through actual export directives
@@ -157,11 +157,11 @@ class ImportResolver {
       if (exportedLib == null) continue;
 
       final combinators = export.combinators;
-      CliLog.fine("  exported lib: ${exportedLib.source.uri}");
+      CliLog.fine("  exported lib: ${exportedLib.uri}");
 
       if (combinators.isEmpty) {
         // no show/hide - include everything from this library
-        for (final element in exportedLib.exportNamespace.definedNames.values) {
+        for (final element in exportedLib.exportNamespace.definedNames2.values) {
           CliLog.fine("    showAll: ${element.name}");
           _mapElementToPublic(element, publicUri);
         }
@@ -171,7 +171,7 @@ class ImportResolver {
           if (combinator is ShowElementCombinator) {
             // include shown names
             for (final name in combinator.shownNames) {
-              final element = exportedLib.exportNamespace.get(name);
+              final element = exportedLib.exportNamespace.get2(name);
               if (element != null) {
                 CliLog.fine("    show: ${element.name}, ${element.runtimeType}");
                 _mapElementToPublic(element, publicUri);
@@ -179,7 +179,7 @@ class ImportResolver {
             }
           } else if (combinator is HideElementCombinator) {
             // exclude hidden names
-            for (final element in exportedLib.exportNamespace.definedNames.values) {
+            for (final element in exportedLib.exportNamespace.definedNames2.values) {
               if (!combinator.hiddenNames.contains(element.name)) {
                 _mapElementToPublic(element, publicUri);
               }
@@ -197,7 +197,7 @@ class ImportResolver {
     final elementLibrary = element.library;
 
     if (elementLibrary == null) return;
-    final definingUri = elementLibrary.source.uri.toString();
+    final definingUri = elementLibrary.uri.toString();
     final exported = _locationCache.putIfAbsent(definingUri, () => <String, Set<String>>{});
     final locations = exported.putIfAbsent(elementName, () => SplayTreeSet<String>());
     locations.add(publicUri);

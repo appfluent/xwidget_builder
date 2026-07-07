@@ -33,81 +33,73 @@ class IconsBuilder extends SpecBuilder {
       for (final path in sourceManifest.paths) {
         final library = libraryElements[path];
         if (library != null) {
-          for (final element in library.topLevelElements) {
-            if (element is PropertyAccessorElement) {
-              final returnType = element.returnType;
-              if (returnType.toString() != "InvalidType") {
-                // has a known return type
-                final classElements = <ClassElement>[];
-                if (element.name == "icons") {
-                  // found a list of icons
-                  final icons = element.variable2?.computeConstantValue()?.toListValue()?.toSet();
-                  if (icons != null) {
-                    for (final icon in icons) {
-                      final variable = icon.variable;
-                      final enclosingElement = variable?.enclosingElement3;
-                      if (variable != null && enclosingElement != null) {
-                        final iconType = icon.type?.displayStringWithoutNullability();
-                        if (iconType == "IconData") {
-                          registrations.write(
-                            _buildRegisterIconCall(
-                              enclosingElement.displayName,
-                              variable.displayName,
-                            ),
-                          );
-                        } else {
-                          CliLog.warn(
-                            "Skipped icon. Expected icon "
-                            "item to be of type 'IconData', but found "
-                            "'$iconType'",
-                          );
-                        }
+          for (final element in library.getters) {
+            final returnType = element.returnType;
+            if (returnType.toString() != "InvalidType") {
+              // has a known return type
+              final classElements = <ClassElement>[];
+              if (element.name == "icons") {
+                // found a list of icons
+                final icons = element.variable.computeConstantValue()?.toListValue()?.toSet();
+                if (icons != null) {
+                  for (final icon in icons) {
+                    final variable = icon.variable;
+                    final enclosingElement = variable?.enclosingElement;
+                    if (variable != null && enclosingElement != null) {
+                      final iconType = icon.type?.displayStringWithoutNullability();
+                      if (iconType == "IconData") {
+                        registrations.write(
+                          _buildRegisterIconCall(
+                            enclosingElement.displayName,
+                            variable.displayName,
+                          ),
+                        );
                       } else {
                         CliLog.warn(
                           "Skipped icon. Expected icon "
-                          "item to be a member of a class e.i. 'Icons.add' "
-                          "or something similar, but found '$icon'",
+                          "item to be of type 'IconData', but found "
+                          "'$iconType'",
                         );
                       }
+                    } else {
+                      CliLog.warn(
+                        "Skipped icon. Expected icon "
+                        "item to be a member of a class e.i. 'Icons.add' "
+                        "or something similar, but found '$icon'",
+                      );
                     }
                   }
-                } else if (element.name == "iconSets") {
-                  // found a list of icon sets
-                  final iconSets = element.variable2
-                      ?.computeConstantValue()
-                      ?.toListValue()
-                      ?.toSet();
-                  if (iconSets != null) {
-                    for (final iconSet in iconSets) {
-                      final element = iconSet.toTypeValue()?.element;
-                      if (element is ClassElement) classElements.add(element);
-                    }
-                  }
-                } else {
-                  // found individual icon set const
-                  final returnElement = returnType.element;
-                  if (returnElement is ClassElement) classElements.add(returnElement);
                 }
-
-                // process all class elements
-                for (final classElement in classElements) {
-                  for (final fieldElement in classElement.fields) {
-                    if (fieldElement.isConst) {
-                      final fieldTypeName = fieldElement.type.displayStringWithoutNullability();
-                      if (fieldTypeName == "IconData") {
-                        registrations.write(
-                          _buildRegisterIconCall(
-                            classElement.displayName,
-                            fieldElement.displayName,
-                          ),
-                        );
-                      }
-                    }
+              } else if (element.name == "iconSets") {
+                // found a list of icon sets
+                final iconSets = element.variable.computeConstantValue()?.toListValue()?.toSet();
+                if (iconSets != null) {
+                  for (final iconSet in iconSets) {
+                    final element = iconSet.toTypeValue()?.element;
+                    if (element is ClassElement) classElements.add(element);
                   }
                 }
               } else {
-                CliLog.error("InvalidType for property '$element' in '${basename(path)}'");
+                // found individual icon set const
+                final returnElement = returnType.element;
+                if (returnElement is ClassElement) classElements.add(returnElement);
               }
+
+              // process all class elements
+              for (final classElement in classElements) {
+                for (final fieldElement in classElement.fields) {
+                  if (fieldElement.isConst) {
+                    final fieldTypeName = fieldElement.type.displayStringWithoutNullability();
+                    if (fieldTypeName == "IconData") {
+                      registrations.write(
+                        _buildRegisterIconCall(classElement.displayName, fieldElement.displayName),
+                      );
+                    }
+                  }
+                }
+              }
+            } else {
+              CliLog.error("InvalidType for property '$element' in '${basename(path)}'");
             }
           }
         } else {

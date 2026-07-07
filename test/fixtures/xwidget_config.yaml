@@ -12,6 +12,25 @@ inflaters:
   sources: [
     "src/inflater_spec.dart"
   ]
+  includes: [
+    "src/test_includes.dart"
+  ]
+  constructor_exclusions: [
+    "TestExclusions:excludedArg"
+  ]
+  constructor_arg_defaults:
+    "TestExclusions:visible": "'fallbackValue'"
+  constructor_arg_parsers:
+    "TestExclusions:visible": "value.trim()"
+
+controllers:
+  target: "src/generated/src/controllers_test.g.dart"
+  sources: [
+    "src/test_controllers.dart"
+  ]
 
 schema:
   target: "xwidget_schema.g.xsd"
+  attribute_exclusions: [
+    "TestExclusions:excludedAttr"
+  ]
