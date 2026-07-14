@@ -76,7 +76,7 @@ inflaters:
     "*:activeIcon": "parseIcon(value)"
 
 schema:
-  target: "xwidget_schema.g.xsd"
+  target: ".xwidget/fragments_schema.g.xsd"
   template: "xwidget_builder|res/schema_template.xsd"
   documentationFormat: "cdata"
 

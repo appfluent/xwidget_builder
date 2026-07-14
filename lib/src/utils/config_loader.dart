@@ -22,6 +22,12 @@ class ConfigLoader {
     return null;
   }
 
+  /// Loads a config YAML document named [fileName] from `.xwidget/`.
+  /// Returns the parsed YAML structure or null if the file doesn't exist.
+  static Future<dynamic> loadConfigYamlDoc(String fileName) async {
+    return loadYamlDoc(PathResolver.resolveConfigFile(fileName));
+  }
+
   /// Extracts a string value from [doc] at the given [key] path.
   /// Returns [defaultValue] if the key doesn't exist or value is not a string.
   /// Supports nested keys using dot notation (e.g., "parent.child").

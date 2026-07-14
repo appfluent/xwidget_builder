@@ -55,7 +55,8 @@ class ProjectConfig {
   }
 
   Future<void> deleteCloudConfig() async {
-    final uri = await PathResolver.relativeToAbsolute('xwidget_cloud.yaml');
+    final path = PathResolver.resolveConfigFile('xwidget_cloud.yaml');
+    final uri = await PathResolver.relativeToAbsolute(path);
     final file = File.fromUri(uri);
     if (file.existsSync()) {
       await file.delete();
@@ -63,7 +64,7 @@ class ProjectConfig {
   }
 
   Future<dynamic> _getCloud() async {
-    return _cloud ??= await ConfigLoader.loadYamlDoc('xwidget_cloud.yaml') ?? {};
+    return _cloud ??= await ConfigLoader.loadConfigYamlDoc('xwidget_cloud.yaml') ?? {};
   }
 
   Future<dynamic> _getPubspec() async {
@@ -75,6 +76,6 @@ class ProjectConfig {
   }
 
   Future<dynamic> _getConfig() async {
-    return _config ??= await ConfigLoader.loadYamlDoc('xwidget_config.yaml') ?? {};
+    return _config ??= await ConfigLoader.loadConfigYamlDoc('xwidget_config.yaml') ?? {};
   }
 }

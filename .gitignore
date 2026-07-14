@@ -32,7 +32,7 @@ build/
 /test/fixtures/import_cache.json
 /test/fixtures/pubspec.lock
 /test/fixtures/schema_test.g.xsd
-/test/fixtures/xwidget_schema.g.xsd
+/test/fixtures/.xwidget/*.g.*
 /test/fixtures/src/generated/
 /test/fixtures/golden_baseline/
 /.flutter-plugins-dependencies

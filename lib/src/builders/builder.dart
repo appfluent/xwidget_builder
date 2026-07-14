@@ -146,7 +146,13 @@ class BuilderConfig {
 
   BuilderConfig({this.allowDeprecated = false});
 
-  Future<void> loadConfig(String path) async {
+  /// Loads configuration from [path]. Set [internal] when loading the
+  /// builder's own default_config.yaml — internal-only settings (currently
+  /// `schema.target`) are read exclusively from there. User configs that
+  /// set them get a warning and are otherwise ignored, since the schema's
+  /// location is fixed infrastructure that the IDE-facing schema catalog
+  /// depends on.
+  Future<void> loadConfig(String path, {bool internal = false}) async {
     final doc = await ConfigLoader.loadYamlDoc(path);
     if (doc != null) {
       CliLog.success("Found config at '$path'");
@@ -177,7 +183,14 @@ class BuilderConfig {
       ConfigLoader.loadToSet(doc, "controllers.sources", controllerConfig.sources);
 
       // schema config
-      schemaConfig.target = ConfigLoader.loadToString(doc, "schema.target", schemaConfig.target);
+      if (internal) {
+        schemaConfig.target = ConfigLoader.loadToString(doc, "schema.target", schemaConfig.target);
+      } else if (ConfigLoader.getValue(doc, "schema.target") != null) {
+        CliLog.warn(
+          "'schema.target' is not configurable and was ignored. The schema "
+          "is always written to '${schemaConfig.target}'.",
+        );
+      }
       schemaConfig.template = ConfigLoader.loadToString(
         doc,
         "schema.template",

@@ -35,10 +35,19 @@ class Files {
   static Future<void> copyFiles(
     Map<String, String> files, {
     bool replace = false,
+    bool skipUnchanged = false,
     void Function(String) existsLogger = CliLog.warn,
+    void Function(String)? skipLogger,
   }) async {
     for (final file in files.entries) {
-      await copyFile(file.key, file.value, replace: replace, existsLogger: existsLogger);
+      await copyFile(
+        file.key,
+        file.value,
+        replace: replace,
+        existsLogger: existsLogger,
+        skipUnchanged: skipUnchanged,
+        skipLogger: skipLogger,
+      );
     }
   }
 
@@ -46,7 +55,9 @@ class Files {
     String src,
     String dst, {
     bool replace = false,
+    bool skipUnchanged = false,
     void Function(String) existsLogger = CliLog.warn,
+    void Function(String)? skipLogger,
   }) async {
     try {
       final srcPath = await PathResolver.relativeToAbsolute(src);
@@ -54,7 +65,11 @@ class Files {
       if (await srcFile.exists()) {
         final dstPath = await PathResolver.relativeToAbsolute(dst);
         final dstFile = File(dstPath.path);
-        if (replace || !await dstFile.exists()) {
+        if (skipUnchanged && await dstFile.exists() && await _sameContents(srcFile, dstFile)) {
+          if (skipLogger != null) {
+            skipLogger("Skipped '$dst' (unchanged)");
+          }
+        } else if (replace || !await dstFile.exists()) {
           await createDir(dstFile.parent);
           await srcFile.copy(dstPath.path);
           CliLog.success("Copied '$src' to '$dst'");
@@ -67,6 +82,32 @@ class Files {
     } catch (e) {
       CliLog.error("Error while copying file: $e");
     }
+  }
+
+  /// Deletes the given project-relative files when they exist. Logs each
+  /// deletion so users can see what was cleaned up.
+  static Future<void> deleteFiles(
+    List<String> paths, {
+    void Function(String) logger = CliLog.success,
+  }) async {
+    for (final filePath in paths) {
+      final uri = await PathResolver.relativeToAbsolute(filePath);
+      final file = File.fromUri(uri);
+      if (await file.exists()) {
+        await file.delete();
+        logger("Deleted '$filePath'");
+      }
+    }
+  }
+
+  static Future<bool> _sameContents(File first, File second) async {
+    if (await first.length() != await second.length()) return false;
+    final firstBytes = await first.readAsBytes();
+    final secondBytes = await second.readAsBytes();
+    for (var i = 0; i < firstBytes.length; i++) {
+      if (firstBytes[i] != secondBytes[i]) return false;
+    }
+    return true;
   }
 }
 

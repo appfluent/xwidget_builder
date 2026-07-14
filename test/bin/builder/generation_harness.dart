@@ -22,12 +22,13 @@ const fixturesPath = 'test/fixtures';
 /// resolve from this directory).
 const baselinePath = 'test/fixtures/golden_baseline';
 
-/// Generated outputs, relative to [fixturesPath].
+/// Generated outputs, relative to [fixturesPath]. The schema path is fixed
+/// (internal to the builder, not configurable via xwidget_config.yaml).
 const generatedFiles = [
   'src/generated/src/inflaters_test.g.dart',
   'src/generated/src/icons_test.g.dart',
   'src/generated/src/controllers_test.g.dart',
-  'xwidget_schema.g.xsd',
+  '.xwidget/fragments_schema.g.xsd',
 ];
 
 /// Runs the generate CLI from the fixture app root.
@@ -39,6 +40,31 @@ Future<ProcessResult> runGenerate([List<String> extraArgs = const []]) {
     '--no-title',
     ...extraArgs,
   ], workingDirectory: fixturesPath);
+}
+
+/// Runs the generate CLI with an alternate config fixture swapped into
+/// `.xwidget/xwidget_config.yaml` for the duration of the run. Generate
+/// always reads config from that location (there is no --config option),
+/// so alternate-config scenarios are exercised by replacing the file.
+///
+/// The schema output path is fixed, so an alternate-config run overwrites
+/// `.xwidget/fragments_schema.g.xsd`. Snapshot and restore it alongside the
+/// config so other tests never see the alternate run's schema, regardless
+/// of test ordering.
+Future<ProcessResult> runGenerateWithConfig(String configFixture) async {
+  final configFile = File('$fixturesPath/.xwidget/xwidget_config.yaml');
+  final schemaFile = File('$fixturesPath/.xwidget/fragments_schema.g.xsd');
+  final originalConfig = configFile.readAsStringSync();
+  final originalSchema = schemaFile.existsSync() ? schemaFile.readAsStringSync() : null;
+  configFile.writeAsStringSync(File('$fixturesPath/$configFixture').readAsStringSync());
+  try {
+    return await runGenerate();
+  } finally {
+    configFile.writeAsStringSync(originalConfig);
+    if (originalSchema != null) {
+      schemaFile.writeAsStringSync(originalSchema);
+    }
+  }
 }
 
 File generatedFile(String relative) => File('$fixturesPath/$relative');

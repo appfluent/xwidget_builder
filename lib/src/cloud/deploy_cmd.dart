@@ -5,6 +5,7 @@ import 'package:pub_semver/pub_semver.dart';
 
 import '../constants.dart';
 import '../utils/ansi.dart';
+import '../utils/path_resolver.dart';
 import '../utils/project_config.dart';
 import '../utils/prompts.dart';
 import 'api/api_models.dart';
@@ -77,11 +78,13 @@ class DeployCommand extends BaseCommand {
       final projectName = await projectConfig.getName();
       final projectDesc = await projectConfig.getDescription();
 
+      final cloudConfigPath = PathResolver.resolveConfigFile('xwidget_cloud.yaml');
+
       CliLog.note("This project has not been added to the cloud yet.\n");
       CliLog.info(
         "Continuing will create a new cloud project named "
-        "'$projectName'\nand generate an xwidget_cloud.yaml config "
-        "file in your project root.\n",
+        "'$projectName'\nand generate a config file at "
+        "'$cloudConfigPath'.\n",
       );
 
       if (!confirmContinue()) {
@@ -93,7 +96,10 @@ class DeployCommand extends BaseCommand {
       projectId = await api.createProject(workspace.id, projectName!, projectDesc);
 
       // write project id to cloud config file
-      await File("xwidget_cloud.yaml").writeAsString("project_id: $projectId");
+      final cloudConfigUri = await PathResolver.relativeToAbsolute(cloudConfigPath);
+      final cloudConfigFile = File.fromUri(cloudConfigUri);
+      await cloudConfigFile.parent.create(recursive: true);
+      await cloudConfigFile.writeAsString("project_id: $projectId");
     }
 
     // --publish preflight: the channel must already exist. Validated before

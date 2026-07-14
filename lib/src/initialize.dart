@@ -7,7 +7,9 @@ import 'generate.dart';
 import 'utils/cli_log.dart';
 import 'utils/commands.dart';
 import 'utils/files.dart';
+import 'utils/migration.dart';
 import 'utils/package_utils.dart';
+import 'utils/path_resolver.dart';
 import 'utils/utils.dart';
 import 'utils/yaml_editor.dart';
 
@@ -20,11 +22,14 @@ class InitializeCommand extends FlexCommand {
   static const initDirs = ["lib/xwidget/controllers", defaultFragmentsPath, defaultValuesPath];
 
   static const initFiles = {
-    "$exampleDir/xwidget_config.yaml": "xwidget_config.yaml",
+    "$exampleDir/xwidget_config.yaml": "$configDir/xwidget_config.yaml",
     "$exampleDir/lib/xwidget/icon_spec.dart": "lib/xwidget/icon_spec.dart",
     "$exampleDir/lib/xwidget/inflater_spec.dart": "lib/xwidget/inflater_spec.dart",
     "$exampleDir/$defaultValuesPath/colors.xml": "$defaultValuesPath/colors.xml",
     "$exampleDir/$defaultValuesPath/strings.xml": "$defaultValuesPath/strings.xml",
+    "$resDir/routes_schema.xsd": "$configDir/routes_schema.g.xsd",
+    "$resDir/values_schema.xsd": "$configDir/values_schema.g.xsd",
+    "$resDir/schema_catalog.xml": "$configDir/schema_catalog.g.xml",
   };
 
   static const newAppFiles = {
@@ -32,12 +37,17 @@ class InitializeCommand extends FlexCommand {
         "lib/xwidget/controllers/app_controller.dart",
     "$exampleDir/$defaultFragmentsPath/my_app.xml": "$defaultFragmentsPath/my_app.xml",
     "$exampleDir/$defaultFragmentsPath/count.xml": "$defaultFragmentsPath/count.xml",
+    "$resDir/routes_schema.xsd": "$configDir/routes_schema.g.xsd",
+    "$resDir/values_schema.xsd": "$configDir/values_schema.g.xsd",
+    "$resDir/schema_catalog.xml": "$configDir/schema_catalog.g.xml",
   };
 
   static const builderPackage = "xwidget_builder";
   static const exampleDir = "xwidget|example";
+  static const configDir = PathResolver.configDir;
 
   static const binDir = "$builderPackage|bin";
+  static const resDir = "$builderPackage|res";
   static const pubspecPath = "pubspec.yaml";
   static const builderPubspecPath = "$builderPackage|pubspec.yaml";
 
@@ -70,6 +80,8 @@ class InitializeCommand extends FlexCommand {
     final pubspec = await YamlEditor.parseFromFile(pubspecPath);
     await updatePubspec(pubspec);
     if (await resolveDependencies()) {
+      // Move any root-level config files into .xwidget/
+      await Migration.migrateConfigFiles();
       await Files.createDirs(initDirs);
       await Files.copyFiles(initFiles, existsLogger: CliLog.skip);
       return true;
@@ -85,6 +97,9 @@ class InitializeCommand extends FlexCommand {
       await updatePubspec(pubspec);
       if (await resolveDependencies()) {
         await buildMain();
+
+        // Move any root-level config files into .xwidget/
+        await Migration.migrateConfigFiles();
         await Files.createDirs(initDirs);
         await Files.copyFiles(initFiles, replace: true);
         await Files.copyFiles(newAppFiles, replace: true);

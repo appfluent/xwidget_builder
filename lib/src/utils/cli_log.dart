@@ -117,7 +117,17 @@ class CliLog {
     if (tc != null || bold) firstLine.write(Ansi.reset);
 
     if (lines.length > 1) {
-      final rest = lines.skip(1).join('\n');
+      // Continuation lines keep the text color, and align under the first
+      // line's text (not the icon) when there is one.
+      final indent = icon != null ? "  " : "";
+      final rest = lines
+          .skip(1)
+          .map((line) {
+            if (line.isEmpty) return line;
+            if (tc == null) return "$indent$line";
+            return "$indent\x1B[1;${tc}m$line${Ansi.reset}";
+          })
+          .join('\n');
       return "$firstLine\n$rest";
     } else {
       return firstLine.toString();

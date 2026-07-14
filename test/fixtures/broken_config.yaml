@@ -6,6 +6,3 @@ inflaters:
   sources: [
     "src/broken_spec.dart"
   ]
-
-schema:
-  target: "src/generated/broken/schema_broken.g.xsd"

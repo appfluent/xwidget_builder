@@ -5,6 +5,7 @@ import 'package:interact2/interact2.dart';
 
 import '../utils/ansi.dart';
 import '../utils/cli_log.dart';
+import '../utils/migration.dart';
 import '../utils/project_config.dart';
 import 'api/api_models.dart';
 import 'api/cloud_api.dart';
@@ -17,6 +18,8 @@ abstract class BaseCommand extends Command {
   @override
   Future<void> run() async {
     if (await verifyAuthenticated()) {
+      // Move any root-level config files into .xwidget/
+      await Migration.migrateConfigFiles();
       await runAuthenticated();
     }
   }

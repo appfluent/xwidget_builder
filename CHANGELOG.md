@@ -1,3 +1,30 @@
+## 0.7.0
+
+- XWidget config and generated schemas now live in a `.xwidget/` folder at the project
+  root instead of cluttering the root itself. `xwidget_config.yaml` and
+  `xwidget_cloud.yaml` are moved there automatically the first time any command reads
+  them (a copy left in the root alongside a `.xwidget/` copy is warned about, never
+  silently deleted). `init` scaffolds new projects with `.xwidget/` from the start.
+- Generated schema files are written to `.xwidget/` under new names —
+  `fragments_schema.g.xsd`, `routes_schema.g.xsd`, `values_schema.g.xsd` — together with
+  `schema_catalog.g.xml`, an XML catalog mapping each namespace to its schema for
+  editors that support catalogs. Stale root copies from earlier versions
+  (`xwidget_*.g.xsd`) are cleaned up after generation; an explicit `schema.target` is
+  still honored and never triggers cleanup of files it didn't produce.
+- The fragment schema's namespace is now `https://xwidget.dev/fragments` (routes and
+  values schemas use `https://xwidget.dev/routes` and `https://xwidget.dev/values`).
+- BREAKING: `generate` no longer takes `--config`. Config is always read from
+  `.xwidget/xwidget_config.yaml` (falling back to the project root, which triggers the
+  one-time move above).
+- Fixed: a widget constructor parameter named `visible` or `for` no longer produces
+  an invalid schema. The base element type already declares those attributes, and
+  re-declaring one is a "duplicate attribute use" XSD violation — strict validators
+  (e.g. xmllint) refused to compile the schema. The inherited declarations still
+  validate the values.
+- BREAKING: `schema.target` is no longer user-configurable — the schema is always
+  written to `.xwidget/fragments_schema.g.xsd`, the location the schema catalog points
+  at. A `schema.target` in `xwidget_config.yaml` is ignored with a warning.
+
 ## 0.6.0
 
 - Upgraded the `analyzer` dependency from 7.x to `>=13.0.0 <14.0.0`. Generated output is

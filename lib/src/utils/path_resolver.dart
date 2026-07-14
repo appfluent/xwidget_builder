@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package_utils.dart';
 
 class PathResolver {
+  /// XWidget's config directory within the user's project.
+  static const configDir = '.xwidget';
+
   static Uri get packageRoot {
     Uri? configUri = findPackageConfigUri(Directory.current);
     return configUri != null ? configUri.resolve("../") : Directory.current.uri;
@@ -49,5 +52,12 @@ class PathResolver {
     }
     final root = packageRoot;
     return root.resolve(path);
+  }
+
+  /// Returns the `.xwidget/` relative path for a config file. Config files
+  /// always live in [configDir] — commands migrate root-level copies up
+  /// front via Migration.migrateConfigFiles, so there is no root fallback.
+  static String resolveConfigFile(String fileName) {
+    return '$configDir/$fileName';
   }
 }

@@ -7,16 +7,16 @@
 #   - test_*.xml — should validate clean
 #   - bad_*.xml  — should fail validation
 #
-# Usage: ./run_tests.sh [path/to/xwidget_schema.g.xsd]
-# Default schema path: ../xwidget_schema.g.xsd
+# Usage: ./run_tests.sh [path/to/fragments_schema.g.xsd]
+# Default schema path: ../fixtures/.xwidget/fragments_schema.g.xsd
 
 set -u
 
-SCHEMA="${1:-../fixtures/xwidget_schema.g.xsd}"
+SCHEMA="${1:-../fixtures/.xwidget/fragments_schema.g.xsd}"
 
 if [[ ! -f "$SCHEMA" ]]; then
     echo "Error: schema not found at $SCHEMA"
-    echo "Usage: $0 [path/to/xwidget_schema.g.xsd]"
+    echo "Usage: $0 [path/to/fragments_schema.g.xsd]"
     exit 2
 fi
 

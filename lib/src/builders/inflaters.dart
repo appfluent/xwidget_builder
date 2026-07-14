@@ -495,8 +495,14 @@ class InflaterBuilder extends SpecBuilder {
         _buildInflaterName(context, constructorName, ".");
     inflaterKeys.add(inflaterKey);
 
+    // objectType (res/schema_template.xsd) already declares these on every
+    // element; re-declaring one in an extension is invalid XSD ("duplicate
+    // attribute use"). The inherited declaration still validates the value.
+    const baseTypeAttributes = {'for', 'visible'};
+
     for (final param in constructor.formalParameters) {
       if ((!param.metadata.hasDeprecated || config.allowDeprecated) &&
+          !baseTypeAttributes.contains(param.displayName) &&
           inflaterConfig.isNotExcludedConstructorArg(constructorName, param.displayName) &&
           schemaConfig.isNotExcludedAttribute(constructorName, param.displayName) &&
           !isPrivateAccessParam(param, isCustomWidget)) {

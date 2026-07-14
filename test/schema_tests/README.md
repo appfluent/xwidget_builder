@@ -8,8 +8,8 @@ From your XWidget project root, after generating the schema:
 
 ```bash
 cd schema_tests
-./run_tests.sh                          # uses ../xwidget_schema.g.xsd
-./run_tests.sh /path/to/xwidget_schema.g.xsd  # explicit path
+./run_tests.sh                          # uses ../fixtures/.xwidget/fragments_schema.g.xsd
+./run_tests.sh /path/to/fragments_schema.g.xsd  # explicit path
 ```
 
 Expected output:
@@ -97,7 +97,7 @@ The runner picks up any file matching the prefix conventions automatically.
 ## Caveats
 
 - Tests assume fragments declare the XWidget namespace as default:
-  `xmlns="http://www.appfluent.us/xwidget"`. Adjust if your fragment
+  `xmlns="https://xwidget.dev/fragments"`. Adjust if your fragment
   conventions differ.
 - The runner exits 1 on any test failure, so it's CI-friendly.
 - `xmllint` schema validation is XSD 1.0 — if the schema uses XSD 1.1

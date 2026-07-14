@@ -25,7 +25,7 @@ void main() {
     inflaters = generatedFile('src/generated/src/inflaters_test.g.dart').readAsStringSync();
     icons = generatedFile('src/generated/src/icons_test.g.dart').readAsStringSync();
     controllers = generatedFile('src/generated/src/controllers_test.g.dart').readAsStringSync();
-    schema = generatedFile('xwidget_schema.g.xsd').readAsStringSync();
+    schema = generatedFile('.xwidget/fragments_schema.g.xsd').readAsStringSync();
   });
 
   test('CLI generate exits cleanly with no errors or warnings', () {
@@ -190,7 +190,7 @@ void main() {
     late String brokenInflaters;
 
     setUpAll(() async {
-      brokenResult = await runGenerate(['-c', 'broken_config.yaml']);
+      brokenResult = await runGenerateWithConfig('broken_config.yaml');
       output = '${brokenResult.stdout}';
       brokenInflaters = generatedFile(
         'src/generated/broken/inflaters_broken.g.dart',

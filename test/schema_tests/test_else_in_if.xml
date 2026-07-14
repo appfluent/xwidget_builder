@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Column xmlns="http://www.appfluent.us/xwidget">
+<Column xmlns="https://xwidget.dev/fragments">
     <if test="${cond}">
         <Text>True branch</Text>
         <param name="result" value="yes"/>

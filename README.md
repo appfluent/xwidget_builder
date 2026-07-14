@@ -22,7 +22,7 @@ Use it as a dev dependency in Flutter apps that render XWidget XML fragments.
 | Icons | Icon registrations for XML icon references |
 | Controllers | Controller factories for XML `<Controller>` elements |
 | Registry | A single `registerXWidgetComponents()` entry point for `XWidget.initialize()` |
-| Schema | `xwidget_schema.g.xsd` for XML validation, completion, and IDE tooltips |
+| Schemas | `.xwidget/fragments_schema.g.xsd`, `routes_schema.g.xsd`, `values_schema.g.xsd`, and a schema catalog for XML validation, completion, and IDE tooltips |
 
 ## Quick Start
 

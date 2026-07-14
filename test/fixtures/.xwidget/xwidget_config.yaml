@@ -30,7 +30,6 @@ controllers:
   ]
 
 schema:
-  target: "xwidget_schema.g.xsd"
   attribute_exclusions: [
     "TestExclusions:excludedAttr"
   ]
